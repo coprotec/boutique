@@ -1,0 +1,42 @@
+# Environnement de développement local.
+# Préprod / prod : docker-compose.preprod.yml / docker-compose.prod.yml (lot 6).
+services:
+  app:
+    build:
+      context: .
+      target: base
+    container_name: boutique_app
+    ports:
+      - "8083:80"
+    volumes:
+      - .:/var/www/boutique
+    environment:
+      APP_ENV: dev
+      DATABASE_URL: "mysql://boutique:boutique@mysql:3306/boutique?serverVersion=8.0.32&charset=utf8mb4"
+      MAILER_DSN: "smtp://mailpit:1025"
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:8.0
+    container_name: boutique_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: boutique
+      MYSQL_USER: boutique
+      MYSQL_PASSWORD: boutique
+      TZ: Europe/Paris
+    ports:
+      - "33063:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  # Capture les emails envoyés en dev : http://localhost:8025
+  mailpit:
+    image: axllent/mailpit
+    container_name: boutique_mailpit
+    ports:
+      - "8025:8025"
+
+volumes:
+  mysql_data:

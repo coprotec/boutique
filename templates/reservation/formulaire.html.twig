@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Réservation · {{ session.formation.intitule }}{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('vue') }}
+{% endblock %}
+
+{% block hero %}{{ include('reservation/_entete.html.twig', {etape: 1}) }}{% endblock %}
+
+{% block body %}
+    <div data-vue="reservation-form" data-props="{{ {config: config}|json_encode|e('html_attr') }}">
+        <div class="panneau text-center py-5">
+            <p class="mb-0">Chargement du formulaire…</p>
+            <noscript><p class="mt-2 mb-0">JavaScript est nécessaire pour réserver en ligne. Vous pouvez aussi contacter le service formation au 03 69 28 89 00.</p></noscript>
+        </div>
+    </div>
+{% endblock %}

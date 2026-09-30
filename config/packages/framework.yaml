@@ -1,0 +1,13 @@
+framework:
+    secret: '%env(APP_SECRET)%'
+    session: true
+
+    # Derrière le Nginx de l'hôte (reverse proxy) : IP client et HTTPS transmis par X-Forwarded-*.
+    trusted_proxies: '%env(TRUSTED_PROXIES)%'
+    trusted_headers: ['x-forwarded-for', 'x-forwarded-host', 'x-forwarded-proto', 'x-forwarded-port']
+
+when@test:
+    framework:
+        test: true
+        session:
+            storage_factory_id: session.storage.factory.mock_file

@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Simulateur de paiement{% endblock %}
+
+{% block body %}
+    <div class="panneau panneau--centre">
+        <p class="tag tag--accent mb-3">Environnement de développement</p>
+        <p class="h4">Simulateur Monetico</p>
+        <p class="text-body-secondary">Commande {{ commande.numero }} · {{ champs.montant|default('') }}</p>
+        <p class="small text-body-secondary">Remplace la page de paiement tant que les identifiants Monetico ne sont pas configurés (MONETICO_SIMULE=1).</p>
+        <form method="post" class="d-flex gap-2 justify-content-center flex-wrap">
+            {% for nom, valeur in champs %}
+                <input type="hidden" name="{{ nom }}" value="{{ valeur }}">
+            {% endfor %}
+            <button name="resultat" value="accepte" class="btn btn-primary">Paiement accepté</button>
+            <button name="resultat" value="refuse" class="btn btn-outline-danger">Paiement refusé</button>
+        </form>
+    </div>
+{% endblock %}

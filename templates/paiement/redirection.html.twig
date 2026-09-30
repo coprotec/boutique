@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+{% from '_icones.html.twig' import icone %}
+
+{% block title %}Paiement{% endblock %}
+
+{% block body %}
+    <div class="panneau panneau--centre">
+        <p class="h4 mb-2">{{ icone('cadenas') }} Redirection vers le paiement sécurisé</p>
+        <p class="text-body-secondary">Commande {{ commande.numero }} · {{ commande.totalTtcCentimes|prix }} TTC</p>
+        <p class="text-body-secondary small">Vos places sont réservées jusqu'à {{ commande.expireLe|date('H:i') }}.</p>
+
+        <form id="paiement" method="post" action="{{ action }}">
+            {% for nom, valeur in champs %}
+                <input type="hidden" name="{{ nom }}" value="{{ valeur }}">
+            {% endfor %}
+            <button type="submit" class="btn btn-primary btn-lg">Payer {{ commande.totalTtcCentimes|prix }}</button>
+        </form>
+    </div>
+    <script>document.getElementById('paiement').submit();</script>
+{% endblock %}

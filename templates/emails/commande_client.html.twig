@@ -1,0 +1,28 @@
+{% extends 'emails/_layout.html.twig' %}
+
+{# PROVISOIRE (QE-20, QE-33) : textes repris de boutique-old, à faire valider. #}
+{% block contenu %}
+    <p>Bonjour {{ commande.contact.prenom }},</p>
+    <p>Votre réservation <strong>{{ commande.numero }}</strong> est bien enregistrée.</p>
+
+    {{ include('emails/_commande.html.twig') }}
+
+    {% if commande.modePaiement.value == 'cb' %}
+        <p>Votre paiement par carte bancaire a été accepté.</p>
+    {% elseif commande.modePaiement.value == 'virement' %}
+        <p><strong>Merci d'effectuer votre virement</strong> de {{ commande.totalTtcCentimes|prix }} aux coordonnées suivantes :<br>
+            IBAN : {{ iban ?: 'communiqué par le service formation' }}<br>
+            BIC : CMCIFRPP<br>
+            Indiquez en motif la référence <strong>{{ commande.numero }}</strong>.</p>
+    {% elseif commande.modePaiement.value == 'cheque' %}
+        <p><strong>Merci d'envoyer votre chèque</strong> de {{ commande.totalTtcCentimes|prix }}, à l'ordre de COPROTEC, sous 10 jours, à l'adresse :<br>
+            COPROTEC — 12, impasse Montgolfier — 68127 Sainte-Croix-en-Plaine<br>
+            Indiquez au dos la référence <strong>{{ commande.numero }}</strong>.</p>
+    {% else %}
+        <p>Afin de finaliser votre dossier, <strong>envoyez-nous l'accord de prise en charge de France Travail</strong> dès sa réception à <a href="mailto:contact@coprotec.net">contact@coprotec.net</a>.</p>
+    {% endif %}
+
+    <p>Une convention de formation vous sera transmise pour finaliser l'inscription.</p>
+    <p><a href="{{ url }}" style="display:inline-block;background:#0071c2;color:#ffffff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:bold;">Voir ma réservation</a></p>
+    <p style="color:#5b6776;font-size:13px;">Une question ? Le service formation vous répond au 03 69 28 89 00.</p>
+{% endblock %}

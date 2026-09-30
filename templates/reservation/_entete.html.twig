@@ -1,0 +1,20 @@
+{# Bandeau du tunnel. Variables : session, etape (1 à 3) #}
+{% from '_icones.html.twig' import icone %}
+<section class="hero hero--compact">
+    <div class="container">
+        <a href="{{ path('formation', {slug: session.formation.slug}) }}" class="hero__retour">← {{ session.formation.intitule }}</a>
+        <h1 class="hero__titre">Réservation</h1>
+        <ul class="hero__infos mb-4">
+            <li>{{ icone('calendrier') }} {% if session.surPlusieursJours %}Du {{ session.dateDebut|date_fr('d MMMM') }} au {{ session.dateFin|date_fr('d MMMM y') }}{% else %}{{ session.dateDebut|date_fr('EEEE d MMMM y') }}{% endif %}</li>
+            {% if session.lieu %}<li>{{ icone('lieu') }} {{ session.lieu }}</li>{% endif %}
+            {% if session.formation.dureeAffichee %}<li>{{ icone('duree') }} {{ session.formation.dureeAffichee }}</li>{% endif %}
+        </ul>
+        <ol class="progression" aria-label="Étapes de la réservation">
+            {% for libelle in ['Informations', 'Paiement', 'Confirmation'] %}
+                <li class="{{ loop.index < etape ? 'fait' : (loop.index == etape ? 'actif') }}" {{ loop.index == etape ? 'aria-current="step"' }}>
+                    <span>{{ loop.index }}</span> {{ libelle }}
+                </li>
+            {% endfor %}
+        </ol>
+    </div>
+</section>

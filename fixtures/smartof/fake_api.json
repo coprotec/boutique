@@ -1,0 +1,98 @@
+{
+    "_commentaire": "Données de l'API SmartOF simulée (SMARTOF_FAKE=1). Formes calquées sur la doc API v2. Les dates « +N days HH:MM » sont relatives à aujourd'hui (Europe/Paris). custom_field_1 = « Vendu sur la boutique » (PROVISOIRE QE-4), custom_field_2 = « Éligible CPF » (PROVISOIRE QE-28).",
+    "salle_formations": [
+        { "salleFormationUid": "5a1e0000-0000-4000-8000-000000000001", "meta": { "nom": "COPROTEC — Sainte-Croix-en-Plaine", "capacite": 12 } },
+        { "salleFormationUid": "5a1e0000-0000-4000-8000-000000000002", "meta": { "nom": "Plateau technique — Strasbourg", "capacite": 10 } }
+    ],
+    "produit_formations": [
+        {
+            "produitFormationUid": "9f000000-0000-4000-8000-000000000001",
+            "customId": "T68-25",
+            "archived": false,
+            "updatedAt": "2026-09-01T08:00:00.000+02:00",
+            "meta": { "nom": "Fluides frigorigènes cat. 1", "status": "Actif" },
+            "description": {
+                "intituleDeLaFormation": "Attestation d'aptitude fluides frigorigènes catégorie 1",
+                "dureeDeLaFormation": 21,
+                "dureeDeLaFormationAffichee": "3 jours (21 h)",
+                "objectifsDeLaFormation": "Obtenir l'attestation d'aptitude à la manipulation des fluides frigorigènes, catégorie 1.",
+                "preRequis": "Connaissances de base en froid et climatisation.",
+                "publicVise": "Techniciens frigoristes, chauffagistes, climaticiens."
+            },
+            "presetTarification": { "tarifs": [ { "tarifUid": "7a000000-0000-4000-8000-000000000001", "intitule": "Tarif public", "budget": [ { "libelle": "Formation", "quantite": 1, "unite": "apprenant(s)", "prixUnitaireHT": 1300, "tva": 20 } ] } ] },
+            "custom_fields": { "custom_field_1": "Oui", "custom_field_2": "Oui" }
+        },
+        {
+            "produitFormationUid": "9f000000-0000-4000-8000-000000000002",
+            "customId": "HAB-B1V",
+            "archived": false,
+            "updatedAt": "2026-09-01T08:00:00.000+02:00",
+            "meta": { "nom": "Habilitation électrique B1V", "status": "Actif" },
+            "description": {
+                "intituleDeLaFormation": "Habilitation électrique B1V - BR - BC",
+                "dureeDeLaFormation": 14,
+                "dureeDeLaFormationAffichee": "2 jours (14 h)",
+                "objectifsDeLaFormation": "Réaliser des opérations d'ordre électrique en sécurité sur des installations basse tension.",
+                "preRequis": "Aucun.",
+                "publicVise": "Électriciens, techniciens de maintenance."
+            },
+            "presetTarification": { "tarifs": [ { "tarifUid": "7a000000-0000-4000-8000-000000000002", "intitule": "Tarif public", "budget": [ { "libelle": "Formation", "quantite": 1, "unite": "apprenant(s)", "prixUnitaireHT": 450, "tva": 20 } ] } ] },
+            "custom_fields": { "custom_field_1": "Oui", "custom_field_2": "" }
+        },
+        {
+            "produitFormationUid": "9f000000-0000-4000-8000-000000000003",
+            "customId": "PAC-01",
+            "archived": false,
+            "updatedAt": "2026-09-01T08:00:00.000+02:00",
+            "meta": { "nom": "Pompes à chaleur", "status": "Actif" },
+            "description": {
+                "intituleDeLaFormation": "Pompes à chaleur : installation et mise en service",
+                "dureeDeLaFormation": 35,
+                "dureeDeLaFormationAffichee": "5 jours (35 h)",
+                "objectifsDeLaFormation": "Dimensionner, installer et mettre en service une pompe à chaleur air/eau.",
+                "preRequis": "Expérience en installation de chauffage.",
+                "publicVise": "Chauffagistes, installateurs."
+            },
+            "presetTarification": { "tarifs": [ { "tarifUid": "7a000000-0000-4000-8000-000000000003", "intitule": "Tarif public", "budget": [ { "libelle": "Formation", "quantite": 5, "unite": "jour(s)", "prixUnitaireHT": 330, "tva": 20 } ] } ] },
+            "custom_fields": { "custom_field_1": "Oui", "custom_field_2": "" }
+        },
+        {
+            "produitFormationUid": "9f000000-0000-4000-8000-000000000004",
+            "customId": "AUT-01",
+            "archived": false,
+            "updatedAt": "2026-09-01T08:00:00.000+02:00",
+            "meta": { "nom": "Formation d'un autre organisme", "status": "Actif" },
+            "description": { "intituleDeLaFormation": "Formation d'un autre organisme (ne doit pas apparaître)", "dureeDeLaFormation": 7, "dureeDeLaFormationAffichee": "1 jour" },
+            "presetTarification": { "tarifs": [ { "tarifUid": "7a000000-0000-4000-8000-000000000004", "intitule": "Tarif", "budget": [ { "libelle": "Formation", "quantite": 1, "unite": "apprenant(s)", "prixUnitaireHT": 200, "tva": 20 } ] } ] },
+            "custom_fields": { "custom_field_1": "Non", "custom_field_2": "" }
+        },
+        {
+            "produitFormationUid": "9f000000-0000-4000-8000-000000000005",
+            "customId": "OLD-01",
+            "archived": true,
+            "updatedAt": "2026-09-01T08:00:00.000+02:00",
+            "meta": { "nom": "Ancienne formation archivée", "status": "Archivé" },
+            "description": { "intituleDeLaFormation": "Ancienne formation archivée (ne doit pas apparaître)", "dureeDeLaFormation": 7, "dureeDeLaFormationAffichee": "1 jour" },
+            "presetTarification": { "tarifs": [] },
+            "custom_fields": { "custom_field_1": "Oui", "custom_field_2": "" }
+        }
+    ],
+    "session_formations": [
+        { "sessionUid": "5e000000-0000-4000-8000-000000000001", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000001" }, "meta": { "nom": "T68-25 — session 1", "dateDebut": "+12 days 08:30", "dateFin": "+14 days 17:00", "status": "Planifiée", "lieu": { "typeLieu": "connu", "salleFormationUid": "5a1e0000-0000-4000-8000-000000000001" } } },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000002", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000001" }, "meta": { "nom": "T68-25 — session 2", "dateDebut": "+40 days 08:30", "dateFin": "+42 days 17:00", "status": "Planifiée", "lieu": { "typeLieu": "connu", "salleFormationUid": "5a1e0000-0000-4000-8000-000000000002" } } },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000003", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000002" }, "meta": { "nom": "HAB-B1V — complète", "dateDebut": "+5 days 08:30", "dateFin": "+6 days 17:00", "status": "Planifiée", "lieu": { "typeLieu": "connu", "salleFormationUid": "5a1e0000-0000-4000-8000-000000000001" } } },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000004", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000002" }, "meta": { "nom": "HAB-B1V — Colmar", "dateDebut": "+20 days 08:30", "dateFin": "+21 days 17:00", "status": "Planifiée", "lieu": { "typeLieu": "libre", "lieuLibre": "Colmar — CCI Alsace" } } },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000005", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000003" }, "meta": { "nom": "PAC — classe virtuelle", "dateDebut": "+30 days 09:00", "dateFin": "+34 days 17:00", "status": "Planifiée", "lieu": { "typeLieu": "virtuel", "urlClasseVirtuelle": "https://visio.example/pac" } } },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000006", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000003" }, "meta": { "nom": "PAC — passée", "dateDebut": "-10 days 09:00", "dateFin": "-6 days 17:00", "status": "Terminée", "lieu": { "typeLieu": "of" } } },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000007", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000003" }, "meta": { "nom": "PAC — inscriptions non ouvertes", "dateDebut": "+60 days 09:00", "dateFin": "+64 days 17:00", "status": "Planifiée", "lieu": { "typeLieu": "of" } } },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000008", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000004" }, "meta": { "nom": "Autre organisme", "dateDebut": "+15 days 09:00", "dateFin": "+15 days 17:00", "status": "Planifiée", "lieu": { "typeLieu": "client" } } }
+    ],
+    "sessions_ouvertes": [
+        { "sessionUid": "5e000000-0000-4000-8000-000000000001", "limite": 8, "inscrits": 5 },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000002", "limite": 8, "inscrits": 0 },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000003", "limite": 10, "inscrits": 10 },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000004", "limite": 10, "inscrits": 3 },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000005", "limite": "∞", "inscrits": 2 },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000008", "limite": 12, "inscrits": 1 }
+    ]
+}

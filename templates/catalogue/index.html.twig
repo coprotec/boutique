@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nos formations{% endblock %}
+
+{% block hero %}
+    <section class="hero">
+        <div class="container">
+            <p class="hero__surtitre">Centre de formation COPROTEC</p>
+            <h1 class="hero__titre">Réservez votre formation en ligne</h1>
+            <p class="hero__texte">Choisissez une session, inscrivez un ou plusieurs participants et réglez en une seule fois.</p>
+        </div>
+    </section>
+{% endblock %}
+
+{% block body %}
+    <form class="filtres" method="get" action="{{ path('catalogue') }}">
+        <div class="filtres__champ">
+            <label for="filtre-formation" class="form-label">Formation</label>
+            <select id="filtre-formation" name="formation" class="form-select">
+                <option value="">Toutes les formations</option>
+                {% for formation in formations %}
+                    <option value="{{ formation.slug }}" {{ filtre.formation == formation.slug ? 'selected' }}>{{ formation.intitule }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filtres__champ">
+            <label for="filtre-mois" class="form-label">Mois</label>
+            <select id="filtre-mois" name="mois" class="form-select">
+                <option value="">Toutes les dates</option>
+                {% for m in mois %}
+                    <option value="{{ m|date('Y-m') }}" {{ filtre.mois == m|date('Y-m') ? 'selected' }}>{{ m|date_fr('MMMM y')|capitalize }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filtres__actions">
+            <button type="submit" class="btn btn-primary">Filtrer</button>
+            {% if filtre.formation or filtre.mois %}<a href="{{ path('catalogue') }}" class="btn btn-link">Réinitialiser</a>{% endif %}
+        </div>
+    </form>
+
+    <p class="resultats">{{ sessions|length }} session{{ sessions|length > 1 ? 's' }} à venir</p>
+
+    <div class="sessions">
+        {% for session in sessions %}
+            {{ include('catalogue/_session.html.twig', {session: session, restantes: places[session.id]}) }}
+        {% else %}
+            <div class="vide">
+                <p class="mb-1 fw-semibold">Aucune session ouverte pour ces critères.</p>
+                <p class="mb-0">Contactez le service formation au 03 69 28 89 00 ou à <a href="mailto:contact@coprotec.net">contact@coprotec.net</a>.</p>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

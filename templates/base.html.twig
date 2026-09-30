@@ -1,0 +1,70 @@
+{% from '_icones.html.twig' import icone %}
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Réservez en ligne les formations proposées par COPROTEC.">
+        <meta name="theme-color" content="#0b2a4a">
+        <title>{% block title %}Formations{% endblock %} · COPROTEC</title>
+        <link rel="icon" href="{{ asset('build/images/logo.png') }}">
+        {% block stylesheets %}
+            {{ encore_entry_link_tags('app') }}
+        {% endblock %}
+        {% block javascripts %}
+            {{ encore_entry_script_tags('app') }}
+        {% endblock %}
+    </head>
+    <body>
+        <a class="visually-hidden-focusable lien-evitement" href="#contenu">Aller au contenu</a>
+
+        <header class="site-header">
+            <nav class="container site-header__barre" aria-label="Navigation principale">
+                <a href="{{ path('catalogue') }}" class="site-header__logo">
+                    <img src="{{ asset('build/images/logo.png') }}" alt="COPROTEC" height="44">
+                    <span class="site-header__nom">Formations</span>
+                </a>
+                <ul class="site-header__liens">
+                    <li class="d-none d-md-block"><a href="https://www.coprotec.net">Revenir au site</a></li>
+                    <li class="d-none d-md-block"><a href="https://www.coprotec.net/formation-chauffagiste/financement-formation/" target="_blank" rel="noopener">Financer sa formation</a></li>
+                    <li><a class="btn btn-contact" href="tel:0369288900">{{ icone('telephone') }}<span class="d-none d-sm-inline"> 03 69 28 89 00</span></a></li>
+                </ul>
+            </nav>
+        </header>
+
+        {% block hero %}{% endblock %}
+
+        <main id="contenu" class="container site-main">
+            {% for type, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ type }}" role="alert">{{ message }}</div>
+                {% endfor %}
+            {% endfor %}
+            {% block body %}{% endblock %}
+        </main>
+
+        <footer class="site-footer">
+            <div class="container site-footer__grille">
+                <div>
+                    <img src="{{ asset('build/images/logo.png') }}" alt="COPROTEC" width="120" class="site-footer__logo">
+                    <p class="mt-3 mb-0">Réservation en ligne des formations COPROTEC.</p>
+                </div>
+                <div>
+                    <p class="site-footer__titre">À propos</p>
+                    <ul class="list-unstyled mb-0">
+                        <li><a href="https://www.coprotec.net/mentions-legales/" target="_blank" rel="noopener">Mentions légales</a></li>
+                        <li><a href="https://www.coprotec.net/politique-confidentialite/" target="_blank" rel="noopener">Politique de confidentialité</a></li>
+                    </ul>
+                </div>
+                <address class="mb-0">
+                    <p class="site-footer__titre">Contact</p>
+                    COPROTEC<br>
+                    12, impasse Montgolfier CS40010<br>
+                    68025 Ste Croix en Plaine Cedex<br>
+                    <a href="tel:0369288900">03 69 28 89 00</a> · <a href="mailto:contact@coprotec.net">contact@coprotec.net</a>
+                </address>
+            </div>
+            <div class="container site-footer__bas">© COPROTEC {{ "now"|date("Y") }}</div>
+        </footer>
+    </body>
+</html>
