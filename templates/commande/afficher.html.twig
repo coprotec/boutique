@@ -1,5 +1,4 @@
 {% extends 'base.html.twig' %}
-{% from '_icones.html.twig' import icone %}
 
 {% block title %}Réservation {{ commande.numero }}{% endblock %}
 
@@ -11,32 +10,32 @@
         <div class="col-lg-8">
             <div class="panneau">
                 {% if statut == 'validee' %}
-                    <p class="confirmation">{{ icone('valide') }} Réservation confirmée</p>
+                    <p class="confirmation">Réservation confirmée</p>
                     <p>Votre réservation porte le numéro <strong>{{ commande.numero }}</strong>. Un récapitulatif a été envoyé à <strong>{{ commande.contact.email }}</strong>.</p>
 
                     {% if commande.modePaiement.value == 'virement' %}
-                        <div class="alerte-info">
-                            <strong>Virement à effectuer : {{ commande.totalTtcCentimes|prix }}</strong><br>
+                        <div class="encadre">
+                            <strong>Virement à effectuer : {{ commande.totalTtcCentimes|price }}</strong><br>
                             IBAN : {{ iban ?: 'communiqué par le service formation' }} · BIC : CMCIFRPP<br>
                             Motif : {{ commande.numero }}
                         </div>
                     {% elseif commande.modePaiement.value == 'cheque' %}
-                        <div class="alerte-info">
-                            <strong>Chèque à envoyer sous 10 jours : {{ commande.totalTtcCentimes|prix }}</strong>, à l'ordre de COPROTEC, au 12, impasse Montgolfier, 68127 Sainte-Croix-en-Plaine. Référence au dos : {{ commande.numero }}.
+                        <div class="encadre">
+                            <strong>Chèque à envoyer sous 10 jours : {{ commande.totalTtcCentimes|price }}</strong>, à l'ordre de COPROTEC, au 12, impasse Montgolfier, 68127 Sainte-Croix-en-Plaine. Référence au dos : {{ commande.numero }}.
                         </div>
                     {% elseif commande.modePaiement.value == 'financement' %}
-                        <div class="alerte-info">Envoyez l'accord de prise en charge de France Travail dès sa réception à <a href="mailto:contact@coprotec.net">contact@coprotec.net</a>.</div>
+                        <div class="encadre">Envoyez l'accord de prise en charge de France Travail dès sa réception à <a href="mailto:contact@coprotec.net">contact@coprotec.net</a>.</div>
                     {% endif %}
                     <p class="mb-0">Une convention de formation vous sera transmise pour finaliser l'inscription.</p>
 
                 {% elseif statut == 'paiement_en_cours' and app.request.query.get('paiement') != 'erreur' %}
-                    <p class="h5">Paiement en cours de confirmation…</p>
+                    <p class="h4">Paiement en cours de confirmation…</p>
                     <p>Nous attendons la confirmation de la banque. Cette page se met à jour automatiquement.</p>
                     <meta http-equiv="refresh" content="5">
                     {% if commande.expireLe > date() %}<a href="{{ path('paiement_cb', {jeton: commande.jeton}) }}" class="btn btn-outline-primary">Revenir au paiement</a>{% endif %}
 
                 {% elseif statut == 'paiement_en_cours' or statut == 'paiement_refuse' %}
-                    <p class="h5 text-danger">Le paiement n'a pas abouti</p>
+                    <p class="h4 text-danger">Le paiement n'a pas abouti</p>
                     <p>Aucun montant n'a été débité.</p>
                     {% if statut == 'paiement_en_cours' and commande.expireLe > date() %}
                         <a href="{{ path('paiement_cb', {jeton: commande.jeton}) }}" class="btn btn-primary">Réessayer le paiement</a>
@@ -45,7 +44,7 @@
                     {% endif %}
 
                 {% else %}
-                    <p class="h5">Délai de paiement dépassé</p>
+                    <p class="h4">Délai de paiement dépassé</p>
                     <p>Les places ont été remises en vente. Vous pouvez recommencer votre réservation.</p>
                     <a href="{{ path('formation', {slug: commande.session.formation.slug}) }}" class="btn btn-primary">Recommencer la réservation</a>
                 {% endif %}
@@ -57,9 +56,9 @@
                 <p class="resume__titre">{{ commande.session.formation.intitule }}</p>
                 <dl class="resume__lignes">
                     <div><dt>Participants</dt><dd>{{ commande.nbParticipants }}</dd></div>
-                    <div><dt>Paiement</dt><dd>{{ commande.modePaiement.libelle }}</dd></div>
-                    <div class="resume__total"><dt>Total HT</dt><dd>{{ commande.totalHtCentimes|prix }}</dd></div>
-                    <div><dt>Total TTC</dt><dd>{{ commande.totalTtcCentimes|prix }}</dd></div>
+                    <div><dt>Paiement</dt><dd>{{ commande.modePaiement.label }}</dd></div>
+                    <div class="resume__total"><dt>Total HT</dt><dd>{{ commande.totalHtCentimes|price }}</dd></div>
+                    <div><dt>Total TTC</dt><dd>{{ commande.totalTtcCentimes|price }}</dd></div>
                 </dl>
                 <ul class="liste-recap mb-0">
                     {% for p in commande.participants %}<li>{{ p.prenom }} {{ p.nom }}</li>{% endfor %}

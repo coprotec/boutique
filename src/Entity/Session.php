@@ -23,7 +23,7 @@ class Session
 
     #[ORM\ManyToOne(inversedBy: 'sessions')]
     #[ORM\JoinColumn(nullable: false)]
-    private Formation $formation;
+    private Course $formation;
 
     #[ORM\Column(length: 255)]
     private string $nom = '';
@@ -52,7 +52,7 @@ class Session
     #[ORM\Column]
     private \DateTimeImmutable $synchroniseLe;
 
-    public function __construct(string $smartofUid, Formation $formation)
+    public function __construct(string $smartofUid, Course $formation)
     {
         $this->smartofUid = $smartofUid;
         $this->formation = $formation;
@@ -62,8 +62,8 @@ class Session
     public function getId(): ?int { return $this->id; }
     public function getSmartofUid(): string { return $this->smartofUid; }
 
-    public function getFormation(): Formation { return $this->formation; }
-    public function setFormation(Formation $formation): static { $this->formation = $formation; return $this; }
+    public function getFormation(): Course { return $this->formation; }
+    public function setFormation(Course $formation): static { $this->formation = $formation; return $this; }
 
     public function getNom(): string { return $this->nom; }
     public function setNom(string $nom): static { $this->nom = $nom; return $this; }
@@ -89,7 +89,7 @@ class Session
     public function getSynchroniseLe(): \DateTimeImmutable { return $this->synchroniseLe; }
     public function setSynchroniseLe(\DateTimeImmutable $synchroniseLe): static { $this->synchroniseLe = $synchroniseLe; return $this; }
 
-    public function surPlusieursJours(): bool
+    public function isMultiDay(): bool
     {
         return $this->dateDebut->format('Y-m-d') !== $this->dateFin->format('Y-m-d');
     }

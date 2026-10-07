@@ -89,18 +89,15 @@ async function envoyer() {
             <!-- 1. Participants -->
             <section class="etape">
                 <header class="etape__entete">
-                    <span class="etape__numero">1</span>
-                    <div>
-                        <h2 class="etape__titre">Participants</h2>
-                        <p class="etape__aide">Une personne par bloc. Le n° de sécurité sociale est exigé pour le passeport prévention.</p>
-                    </div>
+                    <h2 class="etape__titre">Participants</h2>
+                    <p class="etape__aide">Le n° de sécurité sociale est exigé pour le passeport prévention.</p>
                 </header>
 
                 <div v-if="erreur('participants')" class="erreur-bloc">{{ erreur('participants') }}</div>
 
-                <div v-for="(p, i) in form.participants" :key="i" class="participant">
+                <div v-for="(p, i) in form.participants" :key="i" class="participant" role="group" :aria-label="`Participant ${i + 1}`">
                     <div class="participant__entete">
-                        <span class="participant__titre">Participant {{ i + 1 }}</span>
+                        <h3 class="participant__titre">Participant {{ i + 1 }}</h3>
                         <button v-if="nb > 1" type="button" class="btn btn-sm btn-link text-danger" @click="retirer(i)">Retirer</button>
                     </div>
                     <div class="row g-3">
@@ -114,7 +111,7 @@ async function envoyer() {
                 </div>
 
                 <button type="button" class="btn btn-outline-primary btn-ajouter" :disabled="nb >= maxAjout" @click="ajouter">
-                    + Ajouter un participant
+                    Ajouter un participant
                 </button>
                 <p v-if="nb >= maxAjout && c.placesRestantes !== null && c.placesRestantes <= c.maxParticipants" class="etape__aide mt-2">
                     Plus de place disponible sur cette session au-delà de {{ maxAjout }} participant{{ maxAjout > 1 ? 's' : '' }}.
@@ -124,8 +121,7 @@ async function envoyer() {
             <!-- 2. Entreprise -->
             <section class="etape">
                 <header class="etape__entete">
-                    <span class="etape__numero">2</span>
-                    <div><h2 class="etape__titre">Entreprise</h2></div>
+                    <h2 class="etape__titre">Entreprise</h2>
                 </header>
                 <div class="row g-3">
                     <Champ class="col-md-8" label="Raison sociale" v-model="form.societe.raisonSociale" :erreur="erreur('societe.raisonSociale')" autocomplete="organization" />
@@ -148,11 +144,8 @@ async function envoyer() {
             <!-- 3. Contact -->
             <section class="etape">
                 <header class="etape__entete">
-                    <span class="etape__numero">3</span>
-                    <div>
-                        <h2 class="etape__titre">Vos coordonnées</h2>
-                        <p class="etape__aide">Le récapitulatif et la suite de l'inscription sont envoyés à cette adresse.</p>
-                    </div>
+                    <h2 class="etape__titre">Vos coordonnées</h2>
+                    <p class="etape__aide">Le récapitulatif et la suite de l'inscription sont envoyés à cette adresse.</p>
                 </header>
                 <div class="row g-3">
                     <Champ class="col-md-6" label="Prénom" v-model="form.contact.prenom" :erreur="erreur('contact.prenom')" autocomplete="given-name" />
@@ -166,8 +159,7 @@ async function envoyer() {
             <!-- 4. Financement -->
             <section class="etape">
                 <header class="etape__entete">
-                    <span class="etape__numero">4</span>
-                    <div><h2 class="etape__titre">Financement</h2></div>
+                    <h2 class="etape__titre">Financement</h2>
                 </header>
                 <div class="choix" role="radiogroup" aria-label="Mode de financement">
                     <label v-for="f in c.financements" :key="f.valeur" class="choix__option" :class="{ 'choix__option--actif': !cpf && form.financement === f.valeur }">
@@ -181,7 +173,7 @@ async function envoyer() {
                 </div>
                 <div v-if="erreur('financement')" class="erreur-bloc">{{ erreur('financement') }}</div>
 
-                <div v-if="cpf" class="alerte-info mt-3">
+                <div v-if="cpf" class="encadre mt-3 mb-0">
                     Pour financer cette formation avec votre CPF, l'inscription se fait sur
                     <a href="https://www.moncompteformation.gouv.fr" target="_blank" rel="noopener">moncompteformation.gouv.fr</a>.
                 </div>
@@ -208,7 +200,7 @@ async function envoyer() {
                     {{ c.placesRestantes }} place{{ c.placesRestantes > 1 ? 's' : '' }} restante{{ c.placesRestantes > 1 ? 's' : '' }} sur cette session
                 </p>
                 <div v-if="erreurGenerale" class="erreur-bloc" role="alert">{{ erreurGenerale }}</div>
-                <button type="submit" class="btn btn-primary btn-lg w-100" :disabled="envoi || cpf || depassePlaces">
+                <button type="submit" class="btn btn-action btn-lg w-100" :disabled="envoi || cpf || depassePlaces">
                     {{ envoi ? 'Vérification…' : 'Continuer' }}
                 </button>
                 <p class="resume__note">Étape suivante : choix du mode de paiement et confirmation.</p>

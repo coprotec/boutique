@@ -14,7 +14,7 @@ final class Formats
      * N° de sécurité sociale : format de boutique-old (sexe, année, mois, département dont 2A/2B, 8 chiffres)
      * + contrôle de la clé (97 − numéro mod 97, Corse : 2A → 19, 2B → 18).
      */
-    public static function numeroSecuValide(string $numero): bool
+    public static function isValidSocialSecurityNumber(string $numero): bool
     {
         if (1 !== preg_match('/^[12]\d{4}(?:\d{2}|2A|2B)\d{8}$/', $numero)) {
             return false;
@@ -27,14 +27,14 @@ final class Formats
         return $cle === (int) substr($numero, 13, 2);
     }
 
-    /** SIRET : 14 chiffres + clé de Luhn (exception La Poste : SIREN 356000000, somme des chiffres multiple de 5). */
-    public static function siretValide(string $siret): bool
+    /**
+     * SIRET : 14 chiffres + clé de Luhn. Exception : les établissements de La Poste (SIREN 356000000) ont une somme
+     * de chiffres multiple de 5 (le siège, lui, respecte Luhn).
+     */
+    public static function isValidSiret(string $siret): bool
     {
         if (1 !== preg_match('/^\d{14}$/', $siret)) {
             return false;
-        }
-        if (str_starts_with($siret, '356000000')) {
-            return 0 === array_sum(str_split($siret)) % 5;
         }
 
         $somme = 0;
@@ -43,6 +43,7 @@ final class Formats
             $somme += $valeur > 9 ? $valeur - 9 : $valeur;
         }
 
-        return 0 === $somme % 10;
+        return 0 === $somme % 10
+            || (str_starts_with($siret, '356000000') && 0 === array_sum(str_split($siret)) % 5);
     }
 }

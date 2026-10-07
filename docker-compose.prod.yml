@@ -1,0 +1,50 @@
+# Prod : domaine actuel de boutique-old (bascule à la mise en ligne, QE-34), sur le VPS de coplanif.
+# Même organisation que la préprod (cf. docker-compose.preprod.yml), secrets dans .env.prod.local (non versionné) :
+# SmartOF de production, Monetico de production (MONETICO_TEST=0, MONETICO_SIMULE=0).
+name: boutique_prod
+
+services:
+  app:
+    build:
+      context: .
+      target: web
+    image: boutique_prod_app
+    container_name: boutique_prod_app
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8096:80"
+    volumes:
+      - ./.env.prod.local:/var/www/boutique/.env.local:ro
+      - ./var/log:/var/www/boutique/var/log
+    depends_on:
+      - mysql
+
+  cron:
+    build:
+      context: .
+      target: cron
+    image: boutique_prod_cron
+    container_name: boutique_prod_cron
+    restart: unless-stopped
+    volumes:
+      - ./.env.prod.local:/var/www/boutique/.env.local:ro
+      - ./var/log:/var/www/boutique/var/log
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:8.0
+    container_name: boutique_prod_mysql
+    restart: unless-stopped
+    env_file:
+      - ./.env.prod.local
+    environment:
+      MYSQL_DATABASE: boutique
+      MYSQL_USER: boutique
+      TZ: Europe/Paris
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./var/backup:/backup
+
+volumes:
+  mysql_data:

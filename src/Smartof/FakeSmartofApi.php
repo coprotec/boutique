@@ -9,7 +9,8 @@ use Symfony\Component\Uid\Uuid;
 /**
  * API SmartOF simulée pour le dev et les tests (SMARTOF_FAKE=1), en attendant l'instance de test (QSO-1).
  *
- * Lecture : données de fixtures/smartof/fake_api.json. Écriture (entreprises, apprenants, commanditaires) :
+ * Lecture : données de fixtures/smartof/<SMARTOF_FAKE_FIXTURES> (demo_api.json en dev et préprod de démonstration,
+ * fake_api.json pour les tests, qui en dépendent). Écriture (entreprises, apprenants, commanditaires) :
  * conservée dans var/smartof-fake/<env>.json pour pouvoir inspecter ce que la boutique a envoyé.
  * Seuls les comportements documentés utiles à la boutique sont reproduits.
  */
@@ -23,7 +24,7 @@ class FakeSmartofApi
     private ?array $fixtures = null;
 
     public function __construct(
-        #[Autowire('%kernel.project_dir%/fixtures/smartof/fake_api.json')] private readonly string $fixturesFile,
+        #[Autowire('%kernel.project_dir%/fixtures/smartof/%env(SMARTOF_FAKE_FIXTURES)%')] private readonly string $fixturesFile,
         #[Autowire('%kernel.project_dir%/var/smartof-fake/%kernel.environment%.json')] private readonly string $storeFile,
     ) {
     }
@@ -129,7 +130,7 @@ class FakeSmartofApi
             return $this->json(400, ['error' => 'Bad Request', 'message' => 'Les UID sont générés par SmartOF.']);
         }
 
-        $body[$this->uidKey($collection)] = Uuid::v4()->toRfc4122();
+        $body[$this->uidKey($collection)] = self::uuid();
         $body['createdAt'] = (new \DateTimeImmutable())->format(\DATE_RFC3339_EXTENDED);
         $this->append($collection, $body);
 
@@ -162,7 +163,7 @@ class FakeSmartofApi
             return $this->json(409, ['error' => 'Conflict', 'message' => 'Limite de places de la session atteinte.']);
         }
 
-        $body['commanditaireUid'] = Uuid::v4()->toRfc4122();
+        $body['commanditaireUid'] = self::uuid();
         $this->append('commanditaires', $body);
 
         return $this->json(201, ['commanditaireUids' => [$body['commanditaireUid']]]);
@@ -224,6 +225,16 @@ class FakeSmartofApi
         }
 
         return (float) $value <=> (float) $expected;
+    }
+
+    /** UUID v4, comme les UID générés par SmartOF. */
+    private static function uuid(): string
+    {
+        $octets = random_bytes(16);
+        $octets[6] = \chr(\ord($octets[6]) & 0x0F | 0x40);
+        $octets[8] = \chr(\ord($octets[8]) & 0x3F | 0x80);
+
+        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($octets), 4));
     }
 
     private function uidKey(string $collection): string

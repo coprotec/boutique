@@ -5,9 +5,8 @@
 {% block hero %}
     <section class="hero">
         <div class="container">
-            <p class="hero__surtitre">Centre de formation COPROTEC</p>
-            <h1 class="hero__titre">Réservez votre formation en ligne</h1>
-            <p class="hero__texte">Choisissez une session, inscrivez un ou plusieurs participants et réglez en une seule fois.</p>
+            <h1 class="hero__titre">Formations COPROTEC : sessions à venir</h1>
+            <p class="hero__texte">Inscrivez un ou plusieurs salariés à une session et réglez en une seule fois.</p>
         </div>
     </section>
 {% endblock %}
@@ -45,7 +44,7 @@
             {{ include('catalogue/_session.html.twig', {session: session, restantes: places[session.id]}) }}
         {% else %}
             <div class="vide">
-                <p class="mb-1 fw-semibold">Aucune session ouverte pour ces critères.</p>
+                <p class="mb-1 fw-semibold text-body">Aucune session ouverte pour ces critères.</p>
                 <p class="mb-0">Contactez le service formation au 03 69 28 89 00 ou à <a href="mailto:contact@coprotec.net">contact@coprotec.net</a>.</p>
             </div>
         {% endfor %}

@@ -40,10 +40,18 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progre
 COPY . .
 COPY --from=assets /app/public/build ./public/build
 
-RUN composer dump-env ${APP_ENV} \
- && composer dump-autoload --classmap-authoritative --no-dev \
+# Pas de dump-env : les secrets viennent du .env.local monté au lancement (docker-compose.*.yml).
+RUN composer dump-autoload --classmap-authoritative --no-dev \
  && mkdir -p var/cache var/log \
  && chown -R www-data:www-data var
 
 EXPOSE 80
 CMD ["apache2-foreground"]
+
+# ----------- CRON : même code que web, tâches planifiées (docker/cron/crontab)
+FROM web AS cron
+RUN apt-get update && apt-get install -y cron && apt-get clean && rm -rf /var/lib/apt/lists/*
+COPY docker/cron/crontab /etc/cron.d/boutique
+RUN chmod 0644 /etc/cron.d/boutique
+# Les commandes lisent elles-mêmes .env + le .env.local monté : rien à transmettre par l'environnement de cron.
+CMD ["cron", "-f"]

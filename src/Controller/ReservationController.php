@@ -2,18 +2,19 @@
 
 namespace App\Controller;
 
-use App\Catalogue\Disponibilite;
-use App\Catalogue\ReglesReservation;
-use App\Entity\Financement;
-use App\Entity\ModePaiement;
+use App\Catalog\Availability;
+use App\Catalog\BookingRules;
+use App\Entity\Funding;
+use App\Entity\PaymentMethod;
 use App\Entity\Session;
-use App\Notification\Notificateur;
+use App\Notification\Notifier;
 use App\Repository\SessionRepository;
-use App\Reservation\DemandeReservation;
-use App\Reservation\ParticipantSaisi;
-use App\Reservation\PlacesInsuffisantes;
-use App\Reservation\Reservateur;
-use App\Reservation\SocieteSaisie;
+use App\Reservation\ReservationRequest;
+use App\Reservation\ParticipantInput;
+use App\Reservation\InsufficientSeatsException;
+use App\Reservation\ReservationService;
+use App\Reservation\CompanyInput;
+use App\Smartof\EnrollmentSender;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -36,15 +37,15 @@ final class ReservationController extends AbstractController
 
     public function __construct(
         private readonly SessionRepository $sessions,
-        private readonly ReglesReservation $regles,
-        private readonly Disponibilite $disponibilite,
+        private readonly BookingRules $regles,
+        private readonly Availability $disponibilite,
     ) {
     }
 
     #[Route('', name: 'reservation', methods: ['GET'])]
-    public function formulaire(int $id, Request $request, NormalizerInterface $normalizer): Response
+    public function form(int $id, Request $request): Response
     {
-        $session = $this->session($id);
+        $session = $this->findSession($id);
         $formation = $session->getFormation();
 
         return $this->render('reservation/formulaire.html.twig', [
@@ -54,12 +55,12 @@ final class ReservationController extends AbstractController
                 'csrf' => $this->container->get('security.csrf.token_manager')->getToken('reservation')->getValue(),
                 'prixHtCentimes' => $formation->getPrixHtCentimes(),
                 'tauxTva' => $formation->getTauxTva(),
-                'placesRestantes' => $this->disponibilite->placesRestantesSession($session),
-                'maxParticipants' => DemandeReservation::MAX_PARTICIPANTS,
+                'placesRestantes' => $this->disponibilite->remainingSeatsForSession($session),
+                'maxParticipants' => ReservationRequest::MAX_PARTICIPANTS,
                 'eligibleCpf' => $formation->isEligibleCpf(),
-                'organisations' => SocieteSaisie::ORGANISATIONS,
-                'situations' => ParticipantSaisi::SITUATIONS,
-                'financements' => array_map(static fn (Financement $f): array => ['valeur' => $f->value, 'libelle' => $f->libelle()], Financement::cases()),
+                'organisations' => CompanyInput::ORGANISATIONS,
+                'situations' => ParticipantInput::SITUATIONS,
+                'financements' => array_map(static fn (Funding $f): array => ['valeur' => $f->value, 'libelle' => $f->label()], Funding::cases()),
                 'saisie' => $request->getSession()->get(self::CLE_SESSION.$id),
                 'nbInitial' => max(1, $request->query->getInt('participants', 1)),
             ],
@@ -68,10 +69,10 @@ final class ReservationController extends AbstractController
 
     /** Validation de l'étape 1 (JSON). Erreurs : 422 au format « violations » de Symfony, lues par le composant Vue. */
     #[Route('', name: 'reservation_valider', methods: ['POST'], format: 'json')]
-    public function valider(
+    public function validate(
         int $id,
         Request $request,
-        #[MapRequestPayload(validationFailedStatusCode: 422)] DemandeReservation $demande,
+        #[MapRequestPayload(validationFailedStatusCode: 422)] ReservationRequest $demande,
         RateLimiterFactoryInterface $reservationLimiter,
     ): JsonResponse {
         if (!$this->isCsrfTokenValid('reservation', $request->headers->get('X-CSRF-Token'))) {
@@ -81,12 +82,12 @@ final class ReservationController extends AbstractController
             return $this->json(['title' => 'Trop de tentatives, réessayez dans quelques minutes.'], 429);
         }
 
-        $session = $this->session($id);
-        $restantes = $this->disponibilite->placesRestantesSession($session);
-        if (null !== $restantes && \count($demande->participants) > $restantes) {
+        $session = $this->findSession($id);
+        $restantes = $this->disponibilite->remainingSeatsForSession($session);
+        if (null !== $restantes && \count($demande->getParticipants()) > $restantes) {
             return $this->json(['violations' => [[
                 'propertyPath' => 'participants',
-                'title' => (new PlacesInsuffisantes($restantes))->getMessage(),
+                'title' => (new InsufficientSeatsException($restantes))->getMessage(),
             ]]], 422);
         }
 
@@ -96,34 +97,35 @@ final class ReservationController extends AbstractController
     }
 
     #[Route('/recapitulatif', name: 'reservation_recapitulatif', methods: ['GET'])]
-    public function recapitulatif(int $id, Request $request, DenormalizerInterface $denormalizer, ValidatorInterface $validator): Response
+    public function summary(int $id, Request $request, DenormalizerInterface $denormalizer, ValidatorInterface $validator): Response
     {
-        $session = $this->session($id);
-        $demande = $this->demandeEnSession($id, $request, $denormalizer, $validator);
+        $session = $this->findSession($id);
+        $demande = $this->requestFromSession($id, $request, $denormalizer, $validator);
         if (null === $demande) {
             return $this->redirectToRoute('reservation', ['id' => $id]);
         }
 
-        $nb = \count($demande->participants);
+        $nb = \count($demande->getParticipants());
         $prixHt = (int) $session->getFormation()->getPrixHtCentimes();
 
         return $this->render('reservation/recapitulatif.html.twig', [
             'session' => $session,
             'demande' => $demande,
-            'modes' => $demande->financement->modesPaiement(),
+            'modes' => $demande->financement->paymentMethods(),
             'totalHt' => $prixHt * $nb,
             'totalTtc' => (int) round($prixHt * $nb * (1 + $session->getFormation()->getTauxTva() / 100)),
         ]);
     }
 
     #[Route('/confirmer', name: 'reservation_confirmer', methods: ['POST'])]
-    public function confirmer(
+    public function confirm(
         int $id,
         Request $request,
         DenormalizerInterface $denormalizer,
         ValidatorInterface $validator,
-        Reservateur $reservateur,
-        Notificateur $notificateur,
+        ReservationService $reservateur,
+        Notifier $notificateur,
+        EnrollmentSender $transmetteur,
     ): Response {
         if (!$this->isCsrfTokenValid('reservation_confirmer', $request->request->getString('_token'))) {
             $this->addFlash('danger', 'Votre session a expiré, merci de confirmer à nouveau.');
@@ -131,21 +133,21 @@ final class ReservationController extends AbstractController
             return $this->redirectToRoute('reservation_recapitulatif', ['id' => $id]);
         }
 
-        $session = $this->session($id);
-        $demande = $this->demandeEnSession($id, $request, $denormalizer, $validator);
-        $mode = ModePaiement::tryFrom($request->request->getString('mode'));
+        $session = $this->findSession($id);
+        $demande = $this->requestFromSession($id, $request, $denormalizer, $validator);
+        $mode = PaymentMethod::tryFrom($request->request->getString('mode'));
         if (null === $demande) {
             return $this->redirectToRoute('reservation', ['id' => $id]);
         }
-        if (null === $mode || !\in_array($mode, $demande->financement->modesPaiement(), true) || !$request->request->getBoolean('consentement')) {
+        if (null === $mode || !\in_array($mode, $demande->financement->paymentMethods(), true) || !$request->request->getBoolean('consentement')) {
             $this->addFlash('danger', 'Choisissez un mode de paiement et acceptez les conditions pour continuer.');
 
             return $this->redirectToRoute('reservation_recapitulatif', ['id' => $id]);
         }
 
         try {
-            $commande = $reservateur->reserver($session, $demande, $mode);
-        } catch (PlacesInsuffisantes $e) {
+            $commande = $reservateur->reserve($session, $demande, $mode);
+        } catch (InsufficientSeatsException $e) {
             $this->addFlash('warning', $e->getMessage());
 
             return $this->redirectToRoute('reservation', ['id' => $id]);
@@ -153,29 +155,32 @@ final class ReservationController extends AbstractController
 
         $request->getSession()->remove(self::CLE_SESSION.$id);
 
-        if ($mode->enLigne()) {
+        if ($mode->isOnline()) {
             return $this->redirectToRoute('paiement_cb', ['jeton' => $commande->getJeton()]);
         }
 
-        $notificateur->commandeValidee($commande);
+        // Virement, chèque, France Travail : commande validée d'emblée (PROVISOIRE, QE-8), inscrite dans SmartOF tout de suite ;
+        // en cas d'échec, le cron app:smartof:send relance.
+        $notificateur->orderValidated($commande);
+        $transmetteur->send($commande);
 
         return $this->redirectToRoute('commande', ['jeton' => $commande->getJeton()]);
     }
 
-    private function session(int $id): Session
+    private function findSession(int $id): Session
     {
-        return $this->sessions->findReservable($id, $this->regles->debutMin())
+        return $this->sessions->findBookable($id, $this->regles->minStartDate())
             ?? throw new NotFoundHttpException('Cette session n\'est plus proposée à la réservation.');
     }
 
-    private function demandeEnSession(int $id, Request $request, DenormalizerInterface $denormalizer, ValidatorInterface $validator): ?DemandeReservation
+    private function requestFromSession(int $id, Request $request, DenormalizerInterface $denormalizer, ValidatorInterface $validator): ?ReservationRequest
     {
         $donnees = $request->getSession()->get(self::CLE_SESSION.$id);
         if (!\is_array($donnees)) {
             return null;
         }
 
-        $demande = $denormalizer->denormalize($donnees, DemandeReservation::class);
+        $demande = $denormalizer->denormalize($donnees, ReservationRequest::class);
 
         return 0 === \count($validator->validate($demande)) ? $demande : null;
     }

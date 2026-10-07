@@ -10,12 +10,12 @@
     {% if commande.modePaiement.value == 'cb' %}
         <p>Votre paiement par carte bancaire a été accepté.</p>
     {% elseif commande.modePaiement.value == 'virement' %}
-        <p><strong>Merci d'effectuer votre virement</strong> de {{ commande.totalTtcCentimes|prix }} aux coordonnées suivantes :<br>
+        <p><strong>Merci d'effectuer votre virement</strong> de {{ commande.totalTtcCentimes|price }} aux coordonnées suivantes :<br>
             IBAN : {{ iban ?: 'communiqué par le service formation' }}<br>
             BIC : CMCIFRPP<br>
             Indiquez en motif la référence <strong>{{ commande.numero }}</strong>.</p>
     {% elseif commande.modePaiement.value == 'cheque' %}
-        <p><strong>Merci d'envoyer votre chèque</strong> de {{ commande.totalTtcCentimes|prix }}, à l'ordre de COPROTEC, sous 10 jours, à l'adresse :<br>
+        <p><strong>Merci d'envoyer votre chèque</strong> de {{ commande.totalTtcCentimes|price }}, à l'ordre de COPROTEC, sous 10 jours, à l'adresse :<br>
             COPROTEC — 12, impasse Montgolfier — 68127 Sainte-Croix-en-Plaine<br>
             Indiquez au dos la référence <strong>{{ commande.numero }}</strong>.</p>
     {% else %}

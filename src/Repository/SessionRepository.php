@@ -2,7 +2,7 @@
 
 namespace App\Repository;
 
-use App\Entity\Formation;
+use App\Entity\Course;
 use App\Entity\Session;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
@@ -29,9 +29,9 @@ class SessionRepository extends ServiceEntityRepository
      *
      * @return list<Session>
      */
-    public function findReservables(\DateTimeImmutable $debutMin, ?Formation $formation = null, ?string $mois = null): array
+    public function findBookables(\DateTimeImmutable $debutMin, ?Course $formation = null, ?string $mois = null): array
     {
-        $qb = $this->reservables($debutMin);
+        $qb = $this->bookable($debutMin);
 
         if (null !== $formation) {
             $qb->andWhere('s.formation = :formation')->setParameter('formation', $formation);
@@ -47,16 +47,16 @@ class SessionRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function findReservable(int $id, \DateTimeImmutable $debutMin): ?Session
+    public function findBookable(int $id, \DateTimeImmutable $debutMin): ?Session
     {
-        return $this->reservables($debutMin)
+        return $this->bookable($debutMin)
             ->andWhere('s.id = :id')
             ->setParameter('id', $id)
             ->getQuery()
             ->getOneOrNullResult();
     }
 
-    private function reservables(\DateTimeImmutable $debutMin): QueryBuilder
+    private function bookable(\DateTimeImmutable $debutMin): QueryBuilder
     {
         return $this->createQueryBuilder('s')
             ->addSelect('f')

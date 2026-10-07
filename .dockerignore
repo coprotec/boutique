@@ -1,0 +1,14 @@
+# Jamais dans l'image : secrets locaux, données, dépendances reconstruites, documents.
+.git
+.github
+.env.local
+.env.*.local
+var/
+vendor/
+node_modules/
+public/build/
+public/bundles/
+tests/
+*.pdf
+docker-compose.*.yml
+compose.yaml

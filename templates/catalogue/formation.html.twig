@@ -1,5 +1,4 @@
 {% extends 'base.html.twig' %}
-{% from '_icones.html.twig' import icone %}
 
 {% block title %}{{ formation.intitule }}{% endblock %}
 
@@ -8,13 +7,13 @@
         <div class="container">
             <a href="{{ path('catalogue') }}" class="hero__retour">← Toutes les formations</a>
             <div class="d-flex flex-wrap gap-2 mb-2">
-                {% if formation.reference %}<span class="tag tag--clair">{{ formation.reference }}</span>{% endif %}
-                {% if formation.eligibleCpf %}<span class="tag tag--accent">Éligible CPF</span>{% endif %}
+                {% if formation.reference %}<span class="tag">{{ formation.reference }}</span>{% endif %}
+                {% if formation.eligibleCpf %}<span class="tag">Éligible CPF</span>{% endif %}
             </div>
             <h1 class="hero__titre">{{ formation.intitule }}</h1>
             <ul class="hero__infos">
-                {% if formation.dureeAffichee %}<li>{{ icone('duree') }} {{ formation.dureeAffichee }}</li>{% endif %}
-                {% if formation.prixHtCentimes is not null %}<li><strong>{{ formation.prixHtCentimes|prix }} HT</strong>&nbsp;/ participant ({{ formation.prixTtcCentimes|prix }} TTC)</li>{% endif %}
+                {% if formation.dureeAffichee %}<li>{{ formation.dureeAffichee }}</li>{% endif %}
+                {% if formation.prixHtCentimes is not null %}<li><strong>{{ formation.prixHtCentimes|price }} HT</strong>&nbsp;/ participant ({{ formation.prixTtcCentimes|price }} TTC)</li>{% endif %}
             </ul>
         </div>
     </section>
@@ -23,7 +22,7 @@
 {% block body %}
     <div class="row g-4">
         <div class="col-lg-8">
-            <h2 class="h5 mb-3">Sessions à venir</h2>
+            <h2 class="h3 mb-3">Sessions à venir</h2>
             <div class="sessions">
                 {% for session in sessions %}
                     {{ include('catalogue/_session.html.twig', {session: session, restantes: places[session.id], avec_intitule: false}) }}
@@ -37,14 +36,14 @@
 
         <aside class="col-lg-4">
             <div class="panneau">
-                {% if formation.objectifs %}<h2 class="h6">Objectifs</h2><p>{{ formation.objectifs|nl2br }}</p>{% endif %}
-                {% if formation.publicVise %}<h2 class="h6">Public</h2><p>{{ formation.publicVise|nl2br }}</p>{% endif %}
-                {% if formation.prerequis %}<h2 class="h6">Prérequis</h2><p>{{ formation.prerequis|nl2br }}</p>{% endif %}
+                {% if formation.objectifs %}<h2>Objectifs</h2><p>{{ formation.objectifs|nl2br }}</p>{% endif %}
+                {% if formation.publicVise %}<h2>Public</h2><p>{{ formation.publicVise|nl2br }}</p>{% endif %}
+                {% if formation.prerequis %}<h2>Prérequis</h2><p>{{ formation.prerequis|nl2br }}</p>{% endif %}
                 {% if formation.eligibleCpf %}
-                    <div class="alerte-info">Pour financer cette formation avec votre CPF, inscrivez-vous sur <a href="https://www.moncompteformation.gouv.fr" target="_blank" rel="noopener">moncompteformation.gouv.fr</a>.</div>
+                    <div class="encadre">Pour financer cette formation avec votre CPF, inscrivez-vous sur <a href="https://www.moncompteformation.gouv.fr" target="_blank" rel="noopener">moncompteformation.gouv.fr</a>.</div>
                 {% endif %}
                 {# PROVISOIRE (QE-30) : le programme détaillé et les informations Qualiopi restent sur le site vitrine. #}
-                <a href="https://www.coprotec.net" class="lien-fleche" target="_blank" rel="noopener">Programme détaillé sur coprotec.net {{ icone('fleche') }}</a>
+                <a href="https://www.coprotec.net" class="fw-semibold" target="_blank" rel="noopener">Programme détaillé sur coprotec.net</a>
             </div>
         </aside>
     </div>

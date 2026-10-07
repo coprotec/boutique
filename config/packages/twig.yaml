@@ -1,5 +1,9 @@
 twig:
     file_name_pattern: '*.twig'
+    globals:
+        # Bandeau « démonstration » (base.html.twig) dès que le catalogue ou le paiement est simulé.
+        donnees_fictives: '%env(bool:SMARTOF_FAKE)%'
+        paiement_simule: '%env(bool:MONETICO_SIMULE)%'
 
 when@test:
     twig:

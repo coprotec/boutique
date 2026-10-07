@@ -1,14 +1,24 @@
-{# Bandeau du tunnel. Variables : session, etape (1 à 3) #}
-{% from '_icones.html.twig' import icone %}
+{# Bandeau du tunnel : rappel de la session réservée. Variables : session, etape (1 à 3) #}
+{% set formation = session.formation %}
 <section class="hero hero--compact">
     <div class="container">
-        <a href="{{ path('formation', {slug: session.formation.slug}) }}" class="hero__retour">← {{ session.formation.intitule }}</a>
-        <h1 class="hero__titre">Réservation</h1>
-        <ul class="hero__infos mb-4">
-            <li>{{ icone('calendrier') }} {% if session.surPlusieursJours %}Du {{ session.dateDebut|date_fr('d MMMM') }} au {{ session.dateFin|date_fr('d MMMM y') }}{% else %}{{ session.dateDebut|date_fr('EEEE d MMMM y') }}{% endif %}</li>
-            {% if session.lieu %}<li>{{ icone('lieu') }} {{ session.lieu }}</li>{% endif %}
-            {% if session.formation.dureeAffichee %}<li>{{ icone('duree') }} {{ session.formation.dureeAffichee }}</li>{% endif %}
-        </ul>
+        <a href="{{ path('formation', {slug: formation.slug}) }}" class="hero__retour">← Fiche de la formation</a>
+        {% if formation.reference %}<div class="mb-2"><span class="tag">{{ formation.reference }}</span></div>{% endif %}
+        <h1 class="hero__titre">{{ formation.intitule }}</h1>
+        <dl class="rappel-session">
+            <div>
+                <dt>Dates</dt>
+                <dd>{% if session.multiDay %}Du {{ session.dateDebut|date_fr('d MMMM') }} au {{ session.dateFin|date_fr('d MMMM y') }}{% else %}{{ session.dateDebut|date_fr('EEEE d MMMM y')|capitalize }}{% endif %}</dd>
+            </div>
+            {% if formation.dureeAffichee %}<div><dt>Durée</dt><dd>{{ formation.dureeAffichee }}</dd></div>{% endif %}
+            {% if session.lieu %}
+                <div>
+                    <dt>Lieu</dt>
+                    <dd>{{ session.lieu }}{% if session.lieu|directions_url %} · <a href="{{ session.lieu|directions_url }}" target="_blank" rel="noopener">Itinéraire</a>{% endif %}</dd>
+                </div>
+            {% endif %}
+            {% if formation.prixHtCentimes is not null %}<div><dt>Prix</dt><dd>{{ formation.prixHtCentimes|price }} HT / participant</dd></div>{% endif %}
+        </dl>
         <ol class="progression" aria-label="Étapes de la réservation">
             {% for libelle in ['Informations', 'Paiement', 'Confirmation'] %}
                 <li class="{{ loop.index < etape ? 'fait' : (loop.index == etape ? 'actif') }}" {{ loop.index == etape ? 'aria-current="step"' }}>

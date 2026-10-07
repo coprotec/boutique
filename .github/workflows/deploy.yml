@@ -1,0 +1,49 @@
+# Tests à chaque push ; déploiement préprod automatique sur main ; prod uniquement à la main (workflow_dispatch).
+# Secrets GitHub : VPS_HOST, VPS_USER, VPS_SSH_KEY.
+name: CI / déploiement
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      environnement:
+        description: Environnement à déployer
+        type: choice
+        options: [preprod, prod]
+        default: preprod
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: intl, pdo_sqlite, sodium
+      - run: composer install --no-interaction --no-progress
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci && npm run build
+      - run: php bin/phpunit
+
+  deploy:
+    needs: tests
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environnement || 'preprod' }}
+    steps:
+      - uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            ENV_NAME="${{ github.event.inputs.environnement || 'preprod' }}"
+            # Dossier prod = domaine actuel de boutique-old (app.coprotec.net supposé, à confirmer).
+            if [ "$ENV_NAME" = prod ]; then cd /srv/app.coprotec.net; else cd /srv/preprod.app.coprotec.net; fi
+            bash deploy.sh "$ENV_NAME"

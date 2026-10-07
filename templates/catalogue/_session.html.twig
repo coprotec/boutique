@@ -1,46 +1,43 @@
-{# Carte d'une session réservable. Variables : session, restantes (?int, null = illimité), avec_intitule (bool) #}
-{% from '_icones.html.twig' import icone %}
+{# Ligne d'une session réservable. Variables : session, restantes (?int, null = illimité), avec_intitule (bool) #}
 {% set formation = session.formation %}
 {% set complet = restantes is not null and restantes <= 0 %}
-<article class="session-card{{ complet ? ' session-card--complet' }}">
-    <div class="session-card__date" aria-label="Du {{ session.dateDebut|date_fr('d MMMM y') }} au {{ session.dateFin|date_fr('d MMMM y') }}">
-        <span class="session-card__jour">{{ session.dateDebut|date('d') }}</span>
-        <span class="session-card__mois">{{ session.dateDebut|date_fr('MMM') }}</span>
-        <span class="session-card__annee">{{ session.dateDebut|date('Y') }}</span>
+<article class="session{{ complet ? ' session--complet' }}">
+    <div class="session__date" aria-label="Du {{ session.dateDebut|date_fr('d MMMM y') }} au {{ session.dateFin|date_fr('d MMMM y') }}">
+        <span class="session__jour">{{ session.dateDebut|date('d') }}</span>
+        <span class="session__mois">{{ session.dateDebut|date_fr('MMM')|trim('.') }}</span>
+        <span class="session__annee">{{ session.dateDebut|date('Y') }}</span>
     </div>
 
-    <div class="session-card__corps">
+    <div>
         {% if avec_intitule|default(true) %}
-            <div class="d-flex flex-wrap gap-2 mb-1">
+            <div class="session__etiquettes">
                 {% if formation.reference %}<span class="tag">{{ formation.reference }}</span>{% endif %}
-                {% if formation.eligibleCpf %}<span class="tag tag--accent">Éligible CPF</span>{% endif %}
+                {% if formation.eligibleCpf %}<span class="tag tag--cpf">Éligible CPF</span>{% endif %}
             </div>
-            <h2 class="session-card__titre">
+            <h2 class="session__titre">
                 <a href="{{ path('formation', {slug: formation.slug}) }}">{{ formation.intitule }}</a>
             </h2>
         {% endif %}
-        <ul class="session-card__infos">
-            <li>{{ icone('calendrier') }}
-                {% if session.surPlusieursJours %}Du {{ session.dateDebut|date_fr('d MMM') }} au {{ session.dateFin|date_fr('d MMM y') }}{% else %}{{ session.dateDebut|date_fr('EEEE d MMMM y') }}{% endif %}
-            </li>
-            {% if session.lieu %}<li>{{ icone('lieu') }} {{ session.lieu }}</li>{% endif %}
-            {% if formation.dureeAffichee %}<li>{{ icone('duree') }} {{ formation.dureeAffichee }}</li>{% endif %}
-        </ul>
+        <p class="session__infos">
+            <span>{% if session.multiDay %}Du {{ session.dateDebut|date_fr('d MMM') }} au {{ session.dateFin|date_fr('d MMM y') }}{% else %}{{ session.dateDebut|date_fr('EEEE d MMMM y')|capitalize }}{% endif %}</span>
+            {%- if formation.dureeAffichee %}<span>{{ formation.dureeAffichee }}</span>{% endif %}
+        </p>
+        {% if session.lieu %}<p class="session__lieu">{{ session.lieu }}</p>{% endif %}
     </div>
 
-    <div class="session-card__action">
+    <div class="session__action">
         {% if formation.prixHtCentimes is not null %}
-            <div class="prix"><strong>{{ formation.prixHtCentimes|prix }}</strong> <span>HT / participant</span></div>
+            <div class="prix"><strong>{{ formation.prixHtCentimes|price }}</strong> <span>HT / participant</span></div>
         {% endif %}
         {% if complet %}
             <span class="places places--complet">Complet</span>
         {% elseif restantes is null %}
-            <span class="places">{{ icone('personnes') }} Places disponibles</span>
+            <span class="places">Places disponibles</span>
         {% else %}
-            <span class="places{{ restantes <= 3 ? ' places--peu' }}">{{ icone('personnes') }} {{ restantes }} place{{ restantes > 1 ? 's' }} restante{{ restantes > 1 ? 's' }}</span>
+            <span class="places{{ restantes <= 3 ? ' places--peu' }}">{{ restantes }} place{{ restantes > 1 ? 's' }} restante{{ restantes > 1 ? 's' }}</span>
         {% endif %}
         {% if not complet and formation.prixHtCentimes is not null %}
-            <a class="btn btn-primary btn-reserver" href="{{ path('reservation', {id: session.id}) }}">Réserver {{ icone('fleche') }}</a>
+            <a class="btn btn-primary" href="{{ path('reservation', {id: session.id}) }}">Réserver</a>
         {% endif %}
     </div>
 </article>

@@ -15,7 +15,7 @@ class Participant
 
     #[ORM\ManyToOne(inversedBy: 'participants')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
-    private Commande $commande;
+    private Order $commande;
 
     #[ORM\Column(length: 100)]
     private string $prenom;
@@ -29,7 +29,7 @@ class Participant
     #[ORM\Column(length: 50)]
     private string $situation;
 
-    /** N° de sécurité sociale chiffré (libsodium, cf. Chiffreur) ; vidé après transmission et délai RGPD (QE-26). */
+    /** N° de sécurité sociale chiffré (libsodium, cf. Encryptor) ; vidé après transmission et délai RGPD (QE-26). */
     #[ORM\Column(type: Types::TEXT)]
     private string $numeroSecuChiffre = '';
 
@@ -46,14 +46,14 @@ class Participant
     }
 
     public function getId(): ?int { return $this->id; }
-    public function getCommande(): Commande { return $this->commande; }
-    public function setCommande(Commande $commande): void { $this->commande = $commande; }
+    public function getCommande(): Order { return $this->commande; }
+    public function setCommande(Order $commande): void { $this->commande = $commande; }
     public function getPrenom(): string { return $this->prenom; }
     public function getNom(): string { return $this->nom; }
     public function getDateNaissance(): \DateTimeImmutable { return $this->dateNaissance; }
     public function getSituation(): string { return $this->situation; }
     public function getNumeroSecuChiffre(): string { return $this->numeroSecuChiffre; }
-    public function effacerNumeroSecu(): void { $this->numeroSecuChiffre = ''; }
+    public function eraseSocialSecurityNumber(): void { $this->numeroSecuChiffre = ''; }
     public function getSmartofApprenantUid(): ?string { return $this->smartofApprenantUid; }
     public function setSmartofApprenantUid(?string $uid): void { $this->smartofApprenantUid = $uid; }
 }

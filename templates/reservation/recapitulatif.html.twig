@@ -11,11 +11,8 @@
         <div class="tunnel__principal">
             <section class="etape">
                 <header class="etape__entete">
-                    <span class="etape__numero">{{ demande.participants|length }}</span>
-                    <div>
-                        <h2 class="etape__titre">Participant{{ demande.participants|length > 1 ? 's' }}</h2>
-                        <p class="etape__aide"><a href="{{ path('reservation', {id: session.id}) }}">Modifier les informations</a></p>
-                    </div>
+                    <h2 class="etape__titre">Participant{{ demande.participants|length > 1 ? 's' }}</h2>
+                    <p class="etape__aide"><a href="{{ path('reservation', {id: session.id}) }}">Modifier les informations</a></p>
                 </header>
                 <ul class="liste-recap">
                     {% for p in demande.participants %}
@@ -23,23 +20,20 @@
                     {% endfor %}
                 </ul>
                 <dl class="grille-recap">
-                    <div><dt>Entreprise</dt><dd>{{ demande.societe.raisonSociale }}<br><small>{{ demande.societe.adresse }}, {{ demande.societe.codePostal }} {{ demande.societe.ville }} · SIRET {{ demande.societe.siretNormalise }}</small></dd></div>
+                    <div><dt>Entreprise</dt><dd>{{ demande.societe.raisonSociale }}<br><small>{{ demande.societe.adresse }}, {{ demande.societe.codePostal }} {{ demande.societe.ville }} · SIRET {{ demande.societe.normalizedSiret }}</small></dd></div>
                     <div><dt>Contact</dt><dd>{{ demande.contact.prenom }} {{ demande.contact.nom }}<br><small>{{ demande.contact.email }} · {{ demande.contact.telephone }}</small></dd></div>
-                    <div><dt>Financement</dt><dd>{{ demande.financement.libelle }}{% if demande.identifiantFranceTravailNormalise %} · identifiant {{ demande.identifiantFranceTravailNormalise }}{% endif %}</dd></div>
+                    <div><dt>Financement</dt><dd>{{ demande.financement.label }}{% if demande.normalizedFranceTravailId %} · identifiant {{ demande.normalizedFranceTravailId }}{% endif %}</dd></div>
                 </dl>
             </section>
 
             <section class="etape">
-                <header class="etape__entete">
-                    <span class="etape__numero">€</span>
-                    <div><h2 class="etape__titre">Mode de paiement</h2></div>
-                </header>
+                <header class="etape__entete"><h2 class="etape__titre">Mode de paiement</h2></header>
                 <div class="choix choix--vertical" role="radiogroup" aria-label="Mode de paiement">
                     {% for mode in modes %}
                         <label class="choix__option">
                             <input type="radio" name="mode" value="{{ mode.value }}" required {{ modes|length == 1 ? 'checked' }}>
                             <span>
-                                <strong>{{ mode.libelle }}</strong>
+                                <strong>{{ mode.label }}</strong>
                                 <small class="d-block text-body-secondary">
                                     {%- if mode.value == 'cb' %}Paiement sécurisé immédiat (Monetico). Vos places sont réservées pendant le paiement.
                                     {%- elseif mode.value == 'virement' %}Les coordonnées bancaires vous sont envoyées par email avec le récapitulatif.
@@ -63,12 +57,12 @@
             <div class="resume">
                 <p class="resume__titre">{{ session.formation.intitule }}</p>
                 <dl class="resume__lignes">
-                    <div><dt>Prix par participant</dt><dd>{{ session.formation.prixHtCentimes|prix }} HT</dd></div>
+                    <div><dt>Prix par participant</dt><dd>{{ session.formation.prixHtCentimes|price }} HT</dd></div>
                     <div><dt>Participants</dt><dd>× {{ demande.participants|length }}</dd></div>
-                    <div class="resume__total"><dt>Total HT</dt><dd>{{ totalHt|prix }}</dd></div>
-                    <div><dt>Total TTC</dt><dd>{{ totalTtc|prix }}</dd></div>
+                    <div class="resume__total"><dt>Total HT</dt><dd>{{ totalHt|price }}</dd></div>
+                    <div><dt>Total TTC</dt><dd>{{ totalTtc|price }}</dd></div>
                 </dl>
-                <button type="submit" class="btn btn-primary btn-lg w-100">
+                <button type="submit" class="btn btn-action btn-lg w-100">
                     Confirmer la réservation
                 </button>
                 <p class="resume__note">Les places sont vérifiées une dernière fois au moment de la confirmation.</p>

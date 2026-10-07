@@ -1,12 +1,14 @@
 # Boutique formations — questions aux équipes et à SmartOF
 
-> Mis à jour le 2026-09-29. Référencé par [`CAHIER_DES_CHARGES.md`](CAHIER_DES_CHARGES.md).
+> Mis à jour le 2026-10-01. Référencé par [`CAHIER_DES_CHARGES.md`](CAHIER_DES_CHARGES.md).
 >
 > - **QE-n** : question aux équipes COPROTEC (service formation, comptabilité, direction). Aucune n'est technique.
 > - **QSO-n** : question à l'éditeur SmartOF, à poser en réunion.
 > - **(bloquant)** : la réponse est nécessaire avant de développer la partie concernée.
 >
 > Pour répondre, complétez la colonne « Réponse ». « Comme aujourd'hui » est une réponse valable si vous précisez ce qui se fait aujourd'hui.
+>
+> Les numéros ne sont jamais réattribués : une question retirée ou tranchée laisse un trou dans la numérotation (voir « Questions déjà tranchées » en fin de partie 1).
 
 ## Ce que la boutique fera (pour situer les questions)
 
@@ -23,6 +25,7 @@ La nouvelle boutique affiche les formations **COPROTEC** saisies dans SmartOF et
 | QE-1 | Confirmez-vous qu'une réservation payée sur le site devient **directement une inscription**, sans validation par le service formation ? | C'est le fonctionnement retenu, comme l'ancienne boutique. | |
 | QE-2 | Les **particuliers** (sans société) doivent-ils pouvoir réserver ? | L'ancienne boutique exigeait une société et un SIRET : les réservations étaient réservées aux entreprises. | |
 | QE-3 | Combien de participants au maximum par réservation ? | Une société peut inscrire plusieurs salariés à la même session. | |
+| QE-37 | **Session privée (intra) :** quand une entreprise réserve une session entière pour ses seuls salariés, faut-il passer par la boutique ? | Exemple : Leroy Merlin veut une session complète pour son personnel. **Proposition :** le service formation crée la session dans SmartOF ; la boutique génère un **lien privé** (absent du catalogue, sans mot de passe) et son **QR code**, envoyés à l'entreprise, qui inscrit ses participants par ce lien. **a)** Le besoin est-il assez fréquent pour développer cette fonction, ou tout reste-t-il géré hors boutique (devis + virement) ? **b)** Si oui, quel paiement : CB en ligne, virement, ou au choix ? **c)** Prix : celui du catalogue par participant, ou un forfait négocié pour la session ? **d)** Qui inscrit : un responsable de l'entreprise pour tout le groupe, ou chaque salarié lui-même en scannant le QR code ? | |
 
 ### Catalogue et sessions
 
@@ -36,15 +39,12 @@ La nouvelle boutique affiche les formations **COPROTEC** saisies dans SmartOF et
 
 | # | Question | Contexte / proposition | Réponse |
 |---|---|---|---|
-| QE-7 | **(bloquant)** Pendant qu'un client paie, ses places lui sont réservées. Combien de temps au maximum ? | **Proposition : 30 minutes.** Passé ce délai sans paiement, les places sont remises en vente. Cela évite qu'il reste 6 places, que deux sociétés réservent 4 places en même temps et que les deux paient. La seconde est prévenue avant de payer qu'il ne reste que 2 places. | |
 | QE-8 | **(bloquant)** Pour un paiement par **virement ou chèque**, ou un **financement France Travail** : les places sont-elles bloquées dès la commande, avant réception du paiement ou de l'accord de prise en charge ? | Sinon, la session peut se remplir avant l'arrivée du virement ou de l'accord. | |
-| QE-9 | Si une session se remplit malgré tout (inscription faite directement dans SmartOF au même moment), que faire de la réservation payée en trop : accepter un participant de plus, proposer une autre date, rembourser ? Qui prévenir ? | Le cas est rare mais possible. La boutique le détecte et envoie une alerte. | |
 
 ### Tarifs
 
 | # | Question | Contexte / proposition | Réponse |
 |---|---|---|---|
-| QE-10 | **(bloquant)** Une formation peut avoir **plusieurs tarifs** dans SmartOF. Lequel s'applique sur le site, et à qui (entreprise, France Travail, adhérent, tarif réduit…) ? Le prix peut-il varier d'une session à l'autre ? | Les prix sont repris de SmartOF, jamais saisis dans la boutique. | |
 | QE-11 | Le prix affiché est-il en HT, en TTC, ou les deux ? | | |
 | QE-12 | Y a-t-il des frais en plus du prix de la formation (repas, supports, examen) ? | | |
 
@@ -59,7 +59,7 @@ La nouvelle boutique affiche les formations **COPROTEC** saisies dans SmartOF et
 | # | Question | Contexte / proposition | Réponse |
 |---|---|---|---|
 | QE-14 | Pour un virement ou un chèque : qui constate la réception du paiement, et où le note-t-il ? | La boutique n'a pas de back-office en v1. | |
-| QE-15 | Faut-il un délai maximum pour recevoir un virement ou un chèque ? Que se passe-t-il s'il est dépassé (relance, annulation, places libérées) ? | | |
+| QE-15 | Faut-il un délai maximum pour recevoir un virement ou un chèque ? Que se passe-t-il s'il est dépassé (relance, annulation, places libérées) ? | L'ancienne boutique demandait l'envoi du chèque **sous 10 jours**, sans quoi l'inscription n'était pas validée. Même règle pour le virement ? | |
 
 ### Annulation, remboursement, rétractation
 
@@ -112,6 +112,14 @@ La nouvelle boutique affiche les formations **COPROTEC** saisies dans SmartOF et
 | QE-35 | Qui **teste et valide** la boutique en préproduction avant sa mise en ligne (parcours complets, paiement test, contrôle dans SmartOF) ? | Il faut une ou deux personnes du service formation et de la comptabilité. | |
 | QE-36 | Souhaitez-vous des **statistiques** de fréquentation et de réservation ? | L’ancienne boutique charge Google Tag Manager (`GTM-MXWHNLW`). Le reprendre impose un bandeau de consentement aux cookies. Faut-il le garder, et qui gère ce compte ? | |
 
+### Questions déjà tranchées
+
+| # | Question | Décision |
+|---|---|---|
+| QE-7 | Durée du blocage des places pendant le paiement CB. | Question technique, retirée du questionnaire : réglée par l'équipe de développement (30 minutes, réglable). |
+| QE-9 | Réservation payée sur une session remplie entre-temps par un autre canal. | Le client est **remboursé par virement**. La boutique alerte le service formation et la comptabilité. |
+| QE-10 | Tarif à appliquer quand une formation a plusieurs tarifs. | **Prix unique**, fixé sur la formation dans SmartOF : même prix pour tous les clients et toutes les sessions. |
+
 ---
 
 ## Partie 2 — Questions à l'éditeur SmartOF (QSO)
@@ -123,7 +131,7 @@ La nouvelle boutique affiche les formations **COPROTEC** saisies dans SmartOF et
 | QSO-1 | **(bloquant)** Pouvez-vous fournir une **instance de test** (URL et clé dédiées), séparée de la production ? Coût ? Peut-on y copier notre paramétrage (produits, champs personnalisés) ? | Tester des réservations réelles en préprod sans toucher à la production. | |
 | QSO-2 | **Synchro à la demande :** SmartOF peut-il nous prévenir quand une formation ou une session est créée, modifiée ou annulée (webhook, appel vers une URL de notre choix) ? Sinon, est-ce prévu ? | Nous synchronisons une fois par jour, tôt le matin, et voulons pouvoir actualiser dès qu'une session est publiée. | |
 | QSO-3 | **(bloquant)** Notre instance contient aussi des formations d'autres organismes. Existe-t-il dans SmartOF un moyen natif, lisible par l'API, de savoir à quel organisme appartient une formation, ou si elle est publiée au catalogue en ligne ? Sinon, confirmez-vous qu'un champ personnalisé sur le produit est la bonne pratique ? | Afficher et vendre uniquement les formations COPROTEC. | |
-| QSO-4 | Quand un produit a plusieurs tarifs (`presetTarification.tarifs[]`), comment savoir lequel appliquer ? Un prix peut-il être défini au niveau de la session, et où le lire par l'API ? | Afficher et facturer le bon prix. | |
+| QSO-4 | Nos formations ont un **prix unique** (QE-10). Confirmez-vous qu'il se lit dans `presetTarification.tarifs[]` du produit (un seul tarif, HT + TVA) ? Un prix peut-il être surchargé au niveau de la session, et faut-il alors l'ignorer ? | Afficher et facturer le bon prix. | |
 | QSO-5 | Pour une réservation déjà payée, confirmez-vous que la bonne pratique est l'inscription directe (`POST /v2/apprenants` + `POST /v2/commanditaires`), et non `demandes_inscription` ? Est-ce qu'elle déclenche les mêmes automatismes (convocation, convention, extranet) qu'une inscription saisie dans l'interface ? L'API refuse-t-elle une inscription qui dépasse la limite de places ? Le compteur `inscrits` de `sessions_ouvertes` est-il mis à jour immédiatement ? | Éviter les doublons d'emails et la surréservation. | |
 | QSO-6 | Le `customId` d'un commanditaire est-il **unique** (refus d'un doublon) ? | Nous y mettons notre n° de commande pour pouvoir relancer un envoi sans créer de doublon. | |
 | QSO-7 | Comment indiquer qu'une inscription est **déjà payée par CB**, pour que la facture SmartOF apparaisse comme réglée ? Un enregistrement des paiements par l'API est-il prévu ? | Éviter à la comptabilité un rapprochement manuel. | |
@@ -134,3 +142,5 @@ La nouvelle boutique affiche les formations **COPROTEC** saisies dans SmartOF et
 | QSO-12 | Quelle clé recommandez-vous pour retrouver un apprenant existant et éviter les doublons ? Nos participants n'ont pas toujours d'email : nom + prénom + date de naissance suffit-il ? | Ne pas créer deux fois la même personne. | |
 | QSO-13 | **(bloquant)** Quelle **limite de places** fait foi : `remplissage.limite` de `sessions_ouvertes`, ou `effectifMax` du produit ou de la session ? Que signifie une limite « ∞ » ? | Calculer les places restantes affichées et bloquées. | |
 | QSO-14 | Pour une session en plusieurs créneaux non consécutifs, faut-il lire les créneaux (`creneau_formations`) pour afficher les dates exactes, ou `dateDebut` / `dateFin` suffisent-ils ? | Afficher les bonnes dates au client. | |
+| QSO-15 | Pour une **session intra** (réservée à une seule entreprise, QE-37) : comment la créer dans SmartOF pour qu'elle **n'apparaisse pas** dans `sessions_ouvertes` tout en restant lisible par l'API (limite de places, inscrits) ? Peut-on y rattacher l'entreprise cliente ? | Proposer un lien d'inscription privé sans exposer la session au catalogue public. | |
+| QSO-16 | Les **salles de formation** (`salle_formations`) exposent-elles une **adresse postale** par l'API (rue, code postal, ville), ou seulement un nom ? | Afficher l'adresse exacte de la session et un lien d'itinéraire fiable. | |

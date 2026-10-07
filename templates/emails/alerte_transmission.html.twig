@@ -2,12 +2,12 @@
 
 {% block contenu %}
     {% if surreservation %}
-        <p><strong>Surréservation :</strong> la commande <strong>{{ commande.numero }}</strong> est validée (payée ou engagée) mais SmartOF refuse l'inscription, la session semble complète. Conduite à tenir : QE-9.</p>
+        <p><strong>Surréservation :</strong> la commande <strong>{{ commande.numero }}</strong> est validée (payée ou engagée) mais SmartOF refuse l'inscription, la session semble complète. Conduite à tenir : rembourser le client par virement.</p>
     {% else %}
         <p>La commande <strong>{{ commande.numero }}</strong> est validée mais n'a pas pu être inscrite dans SmartOF après {{ commande.tentativesTransmission }} tentative(s). Les relances automatiques sont arrêtées.</p>
     {% endif %}
     <p>Dernière erreur :</p>
     <pre style="background:#f5f7fa;padding:12px;border-radius:8px;white-space:pre-wrap;font-size:12px;">{{ commande.derniereErreur }}</pre>
     {{ include('emails/_commande.html.twig') }}
-    <p>Après correction, relancez l'envoi : <code>php bin/console app:smartof:transmettre {{ commande.numero }}</code></p>
+    <p>Après correction, relancez l'envoi : <code>php bin/console app:smartof:send {{ commande.numero }}</code></p>
 {% endblock %}

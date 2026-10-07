@@ -1,0 +1,54 @@
+# Préprod : preprod.app.coprotec.net, sur le VPS de coplanif, dossier /srv/preprod.app.coprotec.net.
+# Nginx de l'hôte (docker/nginx/preprod.app.coprotec.net.conf) → 127.0.0.1:8095 → Apache du conteneur.
+#
+# Secrets et réglages dans .env.preprod.local (non versionné), monté comme .env.local de Symfony :
+#   APP_ENV=prod, APP_SECRET, DATABASE_URL (hôte « mysql »), MYSQL_ROOT_PASSWORD, MYSQL_PASSWORD,
+#   SMARTOF_* (instance de test, QSO-1), MONETICO_* (MONETICO_TEST=1), MAILER_DSN (Brevo), BOUTIQUE_*.
+name: boutique_preprod
+
+services:
+  app:
+    build:
+      context: .
+      target: web
+    image: boutique_preprod_app
+    container_name: boutique_preprod_app
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8095:80"
+    volumes:
+      - ./.env.preprod.local:/var/www/boutique/.env.local:ro
+      - ./var/log:/var/www/boutique/var/log
+      - ./var/smartof-fake:/var/www/boutique/var/smartof-fake  # SMARTOF_FAKE=1 : inscriptions simulées partagées app/cron
+    depends_on:
+      - mysql
+
+  cron:
+    build:
+      context: .
+      target: cron
+    image: boutique_preprod_cron
+    container_name: boutique_preprod_cron
+    restart: unless-stopped
+    volumes:
+      - ./.env.preprod.local:/var/www/boutique/.env.local:ro
+      - ./var/log:/var/www/boutique/var/log
+      - ./var/smartof-fake:/var/www/boutique/var/smartof-fake  # SMARTOF_FAKE=1 : inscriptions simulées partagées app/cron
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:8.0
+    container_name: boutique_preprod_mysql
+    restart: unless-stopped
+    env_file:
+      - ./.env.preprod.local
+    environment:
+      MYSQL_DATABASE: boutique
+      MYSQL_USER: boutique
+      TZ: Europe/Paris
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:

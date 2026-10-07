@@ -1,0 +1,229 @@
+{
+    "_commentaire": "Catalogue FICTIF de démonstration (SMARTOF_FAKE=1, SMARTOF_FAKE_FIXTURES=demo_api.json) : intitulés, prix et sessions inventés pour montrer le front en interne. Mêmes formes que fake_api.json (doc API v2). Les dates « +N days HH:MM » sont relatives au jour de la synchro (Europe/Paris). custom_field_1 = « Vendu sur la boutique » (PROVISOIRE QE-4), custom_field_2 = « Éligible CPF » (PROVISOIRE QE-28).",
+    "salle_formations": [
+        { "salleFormationUid": "5a1e0000-0000-4000-8000-000000000001", "meta": { "nom": "COPROTEC — Sainte-Croix-en-Plaine", "capacite": 12 } },
+        { "salleFormationUid": "5a1e0000-0000-4000-8000-000000000002", "meta": { "nom": "Plateau technique — Strasbourg", "capacite": 10 } },
+        { "salleFormationUid": "5a1e0000-0000-4000-8000-000000000003", "meta": { "nom": "Salle de formation — Mulhouse", "capacite": 12 } }
+    ],
+    "produit_formations": [
+        {
+            "produitFormationUid": "9f000000-0000-4000-8000-000000000001",
+            "customId": "T68-25",
+            "archived": false,
+            "updatedAt": "2026-09-01T08:00:00.000+02:00",
+            "meta": { "nom": "Fluides frigorigènes cat. 1", "status": "Actif" },
+            "description": {
+                "intituleDeLaFormation": "Attestation d'aptitude fluides frigorigènes catégorie 1",
+                "dureeDeLaFormation": 21,
+                "dureeDeLaFormationAffichee": "3 jours (21 h)",
+                "objectifsDeLaFormation": "Préparer et obtenir l'attestation d'aptitude à la manipulation des fluides frigorigènes, catégorie 1 (tous équipements).\nMaîtriser la réglementation F-Gas et les gestes de récupération et de contrôle d'étanchéité.",
+                "preRequis": "Connaissances de base en froid et climatisation.",
+                "publicVise": "Techniciens frigoristes, chauffagistes, climaticiens."
+            },
+            "presetTarification": { "tarifs": [ { "tarifUid": "7a000000-0000-4000-8000-000000000001", "intitule": "Tarif public", "budget": [ { "libelle": "Formation", "quantite": 1, "unite": "apprenant(s)", "prixUnitaireHT": 1300, "tva": 20 } ] } ] },
+            "custom_fields": { "custom_field_1": "Oui", "custom_field_2": "Oui" }
+        },
+        {
+            "produitFormationUid": "9f000000-0000-4000-8000-000000000002",
+            "customId": "HAB-B1V",
+            "archived": false,
+            "updatedAt": "2026-09-01T08:00:00.000+02:00",
+            "meta": { "nom": "Habilitation électrique B1V", "status": "Actif" },
+            "description": {
+                "intituleDeLaFormation": "Habilitation électrique B1V - BR - BC",
+                "dureeDeLaFormation": 14,
+                "dureeDeLaFormationAffichee": "2 jours (14 h)",
+                "objectifsDeLaFormation": "Réaliser en sécurité des opérations d'ordre électrique sur des installations basse tension, selon la norme NF C 18-510.",
+                "preRequis": "Connaissances de base en électricité.",
+                "publicVise": "Électriciens, chauffagistes, techniciens de maintenance."
+            },
+            "presetTarification": { "tarifs": [ { "tarifUid": "7a000000-0000-4000-8000-000000000002", "intitule": "Tarif public", "budget": [ { "libelle": "Formation", "quantite": 1, "unite": "apprenant(s)", "prixUnitaireHT": 450, "tva": 20 } ] } ] },
+            "custom_fields": { "custom_field_1": "Oui", "custom_field_2": "" }
+        },
+        {
+            "produitFormationUid": "9f000000-0000-4000-8000-000000000003",
+            "customId": "HAB-REC",
+            "archived": false,
+            "updatedAt": "2026-09-01T08:00:00.000+02:00",
+            "meta": { "nom": "Recyclage habilitation électrique", "status": "Actif" },
+            "description": {
+                "intituleDeLaFormation": "Recyclage habilitation électrique B1V - BR - BC",
+                "dureeDeLaFormation": 10.5,
+                "dureeDeLaFormationAffichee": "1,5 jour (10,5 h)",
+                "objectifsDeLaFormation": "Mettre à jour ses connaissances et renouveler son habilitation électrique (recyclage recommandé tous les 3 ans).",
+                "preRequis": "Être titulaire d'une habilitation électrique B1V, BR ou BC.",
+                "publicVise": "Électriciens, chauffagistes, techniciens de maintenance."
+            },
+            "presetTarification": { "tarifs": [ { "tarifUid": "7a000000-0000-4000-8000-000000000003", "intitule": "Tarif public", "budget": [ { "libelle": "Formation", "quantite": 1, "unite": "apprenant(s)", "prixUnitaireHT": 320, "tva": 20 } ] } ] },
+            "custom_fields": { "custom_field_1": "Oui", "custom_field_2": "" }
+        },
+        {
+            "produitFormationUid": "9f000000-0000-4000-8000-000000000004",
+            "customId": "PAC-01",
+            "archived": false,
+            "updatedAt": "2026-09-01T08:00:00.000+02:00",
+            "meta": { "nom": "Pompes à chaleur", "status": "Actif" },
+            "description": {
+                "intituleDeLaFormation": "Pompes à chaleur air/eau : installation et mise en service",
+                "dureeDeLaFormation": 35,
+                "dureeDeLaFormationAffichee": "5 jours (35 h)",
+                "objectifsDeLaFormation": "Dimensionner, installer et mettre en service une pompe à chaleur air/eau.\nRéaliser le diagnostic et l'entretien courant.",
+                "preRequis": "Expérience en installation de chauffage.",
+                "publicVise": "Chauffagistes, installateurs."
+            },
+            "presetTarification": { "tarifs": [ { "tarifUid": "7a000000-0000-4000-8000-000000000004", "intitule": "Tarif public", "budget": [ { "libelle": "Formation", "quantite": 5, "unite": "jour(s)", "prixUnitaireHT": 330, "tva": 20 } ] } ] },
+            "custom_fields": { "custom_field_1": "Oui", "custom_field_2": "" }
+        },
+        {
+            "produitFormationUid": "9f000000-0000-4000-8000-000000000005",
+            "customId": "GAZ-01",
+            "archived": false,
+            "updatedAt": "2026-09-01T08:00:00.000+02:00",
+            "meta": { "nom": "Chaudières gaz à condensation", "status": "Actif" },
+            "description": {
+                "intituleDeLaFormation": "Chaudières gaz à condensation : entretien et dépannage",
+                "dureeDeLaFormation": 21,
+                "dureeDeLaFormationAffichee": "3 jours (21 h)",
+                "objectifsDeLaFormation": "Entretenir, régler et dépanner une chaudière gaz à condensation.\nContrôler la combustion et l'évacuation des produits de combustion.",
+                "preRequis": "Expérience en chauffage.",
+                "publicVise": "Chauffagistes, techniciens SAV."
+            },
+            "presetTarification": { "tarifs": [ { "tarifUid": "7a000000-0000-4000-8000-000000000005", "intitule": "Tarif public", "budget": [ { "libelle": "Formation", "quantite": 1, "unite": "apprenant(s)", "prixUnitaireHT": 990, "tva": 20 } ] } ] },
+            "custom_fields": { "custom_field_1": "Oui", "custom_field_2": "" }
+        },
+        {
+            "produitFormationUid": "9f000000-0000-4000-8000-000000000006",
+            "customId": "SOL-01",
+            "archived": false,
+            "updatedAt": "2026-09-01T08:00:00.000+02:00",
+            "meta": { "nom": "Solaire thermique", "status": "Actif" },
+            "description": {
+                "intituleDeLaFormation": "Solaire thermique : conception et installation d'un chauffe-eau solaire",
+                "dureeDeLaFormation": 21,
+                "dureeDeLaFormationAffichee": "3 jours (21 h)",
+                "objectifsDeLaFormation": "Concevoir, installer et mettre en service un chauffe-eau solaire individuel.",
+                "preRequis": "Expérience en plomberie ou chauffage.",
+                "publicVise": "Plombiers, chauffagistes."
+            },
+            "presetTarification": { "tarifs": [ { "tarifUid": "7a000000-0000-4000-8000-000000000006", "intitule": "Tarif public", "budget": [ { "libelle": "Formation", "quantite": 1, "unite": "apprenant(s)", "prixUnitaireHT": 1150, "tva": 20 } ] } ] },
+            "custom_fields": { "custom_field_1": "Oui", "custom_field_2": "" }
+        },
+        {
+            "produitFormationUid": "9f000000-0000-4000-8000-000000000007",
+            "customId": "PV-01",
+            "archived": false,
+            "updatedAt": "2026-09-01T08:00:00.000+02:00",
+            "meta": { "nom": "Photovoltaïque", "status": "Actif" },
+            "description": {
+                "intituleDeLaFormation": "Photovoltaïque : installation et raccordement",
+                "dureeDeLaFormation": 21,
+                "dureeDeLaFormationAffichee": "3 jours (21 h)",
+                "objectifsDeLaFormation": "Installer et raccorder une installation photovoltaïque en toiture, en respectant les règles de sécurité électrique.",
+                "preRequis": "Habilitation électrique conseillée.",
+                "publicVise": "Électriciens, couvreurs, installateurs."
+            },
+            "presetTarification": { "tarifs": [ { "tarifUid": "7a000000-0000-4000-8000-000000000007", "intitule": "Tarif public", "budget": [ { "libelle": "Formation", "quantite": 1, "unite": "apprenant(s)", "prixUnitaireHT": 1200, "tva": 20 } ] } ] },
+            "custom_fields": { "custom_field_1": "Oui", "custom_field_2": "" }
+        },
+        {
+            "produitFormationUid": "9f000000-0000-4000-8000-000000000008",
+            "customId": "BOIS-01",
+            "archived": false,
+            "updatedAt": "2026-09-01T08:00:00.000+02:00",
+            "meta": { "nom": "Bois énergie", "status": "Actif" },
+            "description": {
+                "intituleDeLaFormation": "Chaudières et poêles bois : installation et entretien",
+                "dureeDeLaFormation": 14,
+                "dureeDeLaFormationAffichee": "2 jours (14 h)",
+                "objectifsDeLaFormation": "Installer et entretenir un appareil de chauffage au bois (bûches, granulés).",
+                "preRequis": "Expérience en chauffage.",
+                "publicVise": "Chauffagistes, fumistes."
+            },
+            "presetTarification": { "tarifs": [ { "tarifUid": "7a000000-0000-4000-8000-000000000008", "intitule": "Tarif public", "budget": [ { "libelle": "Formation", "quantite": 1, "unite": "apprenant(s)", "prixUnitaireHT": 780, "tva": 20 } ] } ] },
+            "custom_fields": { "custom_field_1": "Oui", "custom_field_2": "" }
+        },
+        {
+            "produitFormationUid": "9f000000-0000-4000-8000-000000000009",
+            "customId": "REN-01",
+            "archived": false,
+            "updatedAt": "2026-09-01T08:00:00.000+02:00",
+            "meta": { "nom": "Rénovation énergétique", "status": "Actif" },
+            "description": {
+                "intituleDeLaFormation": "Rénovation énergétique des logements : conseiller et proposer une offre globale",
+                "dureeDeLaFormation": 21,
+                "dureeDeLaFormationAffichee": "3 jours (21 h)",
+                "objectifsDeLaFormation": "Identifier les points faibles énergétiques d'un logement et proposer une offre de travaux cohérente.",
+                "preRequis": "Aucun.",
+                "publicVise": "Artisans du bâtiment, chefs d'entreprise."
+            },
+            "presetTarification": { "tarifs": [ { "tarifUid": "7a000000-0000-4000-8000-000000000009", "intitule": "Tarif public", "budget": [ { "libelle": "Formation", "quantite": 1, "unite": "apprenant(s)", "prixUnitaireHT": 690, "tva": 20 } ] } ] },
+            "custom_fields": { "custom_field_1": "Oui", "custom_field_2": "" }
+        },
+        {
+            "produitFormationUid": "9f000000-0000-4000-8000-000000000098",
+            "customId": "AUT-01",
+            "archived": false,
+            "updatedAt": "2026-09-01T08:00:00.000+02:00",
+            "meta": { "nom": "Formation d'un autre organisme", "status": "Actif" },
+            "description": { "intituleDeLaFormation": "Formation d'un autre organisme (ne doit pas apparaître)", "dureeDeLaFormation": 7, "dureeDeLaFormationAffichee": "1 jour" },
+            "presetTarification": { "tarifs": [ { "tarifUid": "7a000000-0000-4000-8000-000000000098", "intitule": "Tarif", "budget": [ { "libelle": "Formation", "quantite": 1, "unite": "apprenant(s)", "prixUnitaireHT": 200, "tva": 20 } ] } ] },
+            "custom_fields": { "custom_field_1": "Non", "custom_field_2": "" }
+        },
+        {
+            "produitFormationUid": "9f000000-0000-4000-8000-000000000099",
+            "customId": "OLD-01",
+            "archived": true,
+            "updatedAt": "2026-09-01T08:00:00.000+02:00",
+            "meta": { "nom": "Ancienne formation archivée", "status": "Archivé" },
+            "description": { "intituleDeLaFormation": "Ancienne formation archivée (ne doit pas apparaître)", "dureeDeLaFormation": 7, "dureeDeLaFormationAffichee": "1 jour" },
+            "presetTarification": { "tarifs": [] },
+            "custom_fields": { "custom_field_1": "Oui", "custom_field_2": "" }
+        }
+    ],
+    "session_formations": [
+        { "sessionUid": "5e000000-0000-4000-8000-000000000001", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000001" }, "meta": { "nom": "T68-25", "dateDebut": "+9 days 08:30", "dateFin": "+11 days 17:00", "status": "Planifiée", "lieu": { "typeLieu": "connu", "salleFormationUid": "5a1e0000-0000-4000-8000-000000000001" } } },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000002", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000001" }, "meta": { "nom": "T68-25", "dateDebut": "+37 days 08:30", "dateFin": "+39 days 17:00", "status": "Planifiée", "lieu": { "typeLieu": "connu", "salleFormationUid": "5a1e0000-0000-4000-8000-000000000002" } } },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000003", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000001" }, "meta": { "nom": "T68-25", "dateDebut": "+79 days 08:30", "dateFin": "+81 days 17:00", "status": "Planifiée", "lieu": { "typeLieu": "connu", "salleFormationUid": "5a1e0000-0000-4000-8000-000000000001" } } },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000004", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000002" }, "meta": { "nom": "HAB-B1V — complète", "dateDebut": "+5 days 08:30", "dateFin": "+6 days 17:00", "status": "Planifiée", "lieu": { "typeLieu": "connu", "salleFormationUid": "5a1e0000-0000-4000-8000-000000000001" } } },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000005", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000002" }, "meta": { "nom": "HAB-B1V", "dateDebut": "+22 days 08:30", "dateFin": "+23 days 17:00", "status": "Planifiée", "lieu": { "typeLieu": "libre", "lieuLibre": "Colmar — CCI Alsace" } } },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000006", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000002" }, "meta": { "nom": "HAB-B1V", "dateDebut": "+50 days 08:30", "dateFin": "+51 days 17:00", "status": "Planifiée", "lieu": { "typeLieu": "connu", "salleFormationUid": "5a1e0000-0000-4000-8000-000000000003" } } },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000007", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000003" }, "meta": { "nom": "HAB-REC", "dateDebut": "+15 days 08:30", "dateFin": "+16 days 12:00", "status": "Planifiée", "lieu": { "typeLieu": "connu", "salleFormationUid": "5a1e0000-0000-4000-8000-000000000001" } } },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000008", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000003" }, "meta": { "nom": "HAB-REC", "dateDebut": "+64 days 08:30", "dateFin": "+65 days 12:00", "status": "Planifiée", "lieu": { "typeLieu": "connu", "salleFormationUid": "5a1e0000-0000-4000-8000-000000000003" } } },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000009", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000004" }, "meta": { "nom": "PAC-01", "dateDebut": "+18 days 08:30", "dateFin": "+22 days 17:00", "status": "Planifiée", "lieu": { "typeLieu": "connu", "salleFormationUid": "5a1e0000-0000-4000-8000-000000000002" } } },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000010", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000004" }, "meta": { "nom": "PAC-01 — classe virtuelle", "dateDebut": "+44 days 09:00", "dateFin": "+48 days 17:00", "status": "Planifiée", "lieu": { "typeLieu": "virtuel", "urlClasseVirtuelle": "https://visio.example/pac" } } },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000011", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000004" }, "meta": { "nom": "PAC-01 — inscriptions non ouvertes", "dateDebut": "+120 days 08:30", "dateFin": "+124 days 17:00", "status": "Planifiée", "lieu": { "typeLieu": "of" } } },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000012", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000005" }, "meta": { "nom": "GAZ-01", "dateDebut": "+12 days 08:30", "dateFin": "+14 days 17:00", "status": "Planifiée", "lieu": { "typeLieu": "of" } } },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000013", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000005" }, "meta": { "nom": "GAZ-01", "dateDebut": "+58 days 08:30", "dateFin": "+60 days 17:00", "status": "Planifiée", "lieu": { "typeLieu": "connu", "salleFormationUid": "5a1e0000-0000-4000-8000-000000000003" } } },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000014", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000006" }, "meta": { "nom": "SOL-01", "dateDebut": "+29 days 08:30", "dateFin": "+31 days 17:00", "status": "Planifiée", "lieu": { "typeLieu": "connu", "salleFormationUid": "5a1e0000-0000-4000-8000-000000000001" } } },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000015", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000007" }, "meta": { "nom": "PV-01", "dateDebut": "+26 days 08:30", "dateFin": "+28 days 17:00", "status": "Planifiée", "lieu": { "typeLieu": "connu", "salleFormationUid": "5a1e0000-0000-4000-8000-000000000002" } } },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000016", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000007" }, "meta": { "nom": "PV-01", "dateDebut": "+86 days 08:30", "dateFin": "+88 days 17:00", "status": "Planifiée", "lieu": { "typeLieu": "connu", "salleFormationUid": "5a1e0000-0000-4000-8000-000000000001" } } },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000017", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000008" }, "meta": { "nom": "BOIS-01", "dateDebut": "+33 days 08:30", "dateFin": "+34 days 17:00", "status": "Planifiée", "lieu": { "typeLieu": "connu", "salleFormationUid": "5a1e0000-0000-4000-8000-000000000001" } } },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000018", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000009" }, "meta": { "nom": "REN-01", "dateDebut": "+8 days 08:30", "dateFin": "+10 days 17:00", "status": "Planifiée", "lieu": { "typeLieu": "connu", "salleFormationUid": "5a1e0000-0000-4000-8000-000000000003" } } },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000019", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000009" }, "meta": { "nom": "REN-01 — classe virtuelle", "dateDebut": "+71 days 09:00", "dateFin": "+73 days 17:00", "status": "Planifiée", "lieu": { "typeLieu": "virtuel", "urlClasseVirtuelle": "https://visio.example/ren" } } },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000020", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000005" }, "meta": { "nom": "GAZ-01 — passée", "dateDebut": "-10 days 08:30", "dateFin": "-8 days 17:00", "status": "Terminée", "lieu": { "typeLieu": "of" } } },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000021", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000098" }, "meta": { "nom": "Autre organisme", "dateDebut": "+15 days 09:00", "dateFin": "+15 days 17:00", "status": "Planifiée", "lieu": { "typeLieu": "client" } } },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000022", "archive": false, "produitInstance": { "produitFormationUid": "9f000000-0000-4000-8000-000000000006" }, "meta": { "nom": "SOL-01", "dateDebut": "+99 days 08:30", "dateFin": "+101 days 17:00", "status": "Planifiée", "lieu": { "typeLieu": "connu", "salleFormationUid": "5a1e0000-0000-4000-8000-000000000003" } } }
+    ],
+    "sessions_ouvertes": [
+        { "sessionUid": "5e000000-0000-4000-8000-000000000001", "limite": 8, "inscrits": 6 },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000002", "limite": 8, "inscrits": 2 },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000003", "limite": 8, "inscrits": 0 },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000004", "limite": 10, "inscrits": 10 },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000005", "limite": 10, "inscrits": 3 },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000006", "limite": 10, "inscrits": 1 },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000007", "limite": 12, "inscrits": 9 },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000008", "limite": 12, "inscrits": 0 },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000009", "limite": 8, "inscrits": 7 },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000010", "limite": "∞", "inscrits": 4 },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000012", "limite": 8, "inscrits": 4 },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000013", "limite": 8, "inscrits": 0 },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000014", "limite": 10, "inscrits": 2 },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000015", "limite": 10, "inscrits": 5 },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000016", "limite": 10, "inscrits": 0 },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000017", "limite": 8, "inscrits": 3 },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000018", "limite": 12, "inscrits": 8 },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000019", "limite": "∞", "inscrits": 11 },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000021", "limite": 12, "inscrits": 1 },
+        { "sessionUid": "5e000000-0000-4000-8000-000000000022", "limite": 10, "inscrits": 0 }
+    ]
+}
