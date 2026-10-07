@@ -1,5 +1,5 @@
 {
-    "_commentaire": "Catalogue FICTIF de démonstration (SMARTOF_FAKE=1, SMARTOF_FAKE_FIXTURES=demo_api.json) : intitulés, prix et sessions inventés pour montrer le front en interne. Mêmes formes que fake_api.json (doc API v2). Les dates « +N days HH:MM » sont relatives au jour de la synchro (Europe/Paris). custom_field_1 = « Vendu sur la boutique » (PROVISOIRE QE-4), custom_field_2 = « Éligible CPF » (PROVISOIRE QE-28).",
+    "_commentaire": "Catalogue FICTIF de démonstration (SMARTOF_FAKE=1, SMARTOF_FAKE_FIXTURES=demo_api.json) : intitulés, prix et sessions inventés pour montrer le front en interne. Mêmes formes que fake_api.json (doc API v2). Les dates « +N days HH:MM » sont relatives au jour de la synchro (Europe/Paris). custom_field_1 = « Vendu sur la boutique » (PROVISOIRE QSO-3), custom_field_2 = « Éligible CPF » (PROVISOIRE QSO-18).",
     "salle_formations": [
         { "salleFormationUid": "5a1e0000-0000-4000-8000-000000000001", "meta": { "nom": "COPROTEC — Sainte-Croix-en-Plaine", "capacite": 12 } },
         { "salleFormationUid": "5a1e0000-0000-4000-8000-000000000002", "meta": { "nom": "Plateau technique — Strasbourg", "capacite": 10 } },

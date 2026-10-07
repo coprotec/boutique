@@ -12,7 +12,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  */
 final class ReservationRequest
 {
-    /** PROVISOIRE (QE-3) : nombre maximum de participants par réservation. */
+    /** PROVISOIRE (QE-3 / QSO-19) : nombre maximum de participants par réservation. */
     public const MAX_PARTICIPANTS = 10;
 
     /**

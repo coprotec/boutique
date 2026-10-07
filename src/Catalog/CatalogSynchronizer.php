@@ -30,9 +30,9 @@ class CatalogSynchronizer
         private readonly SessionRepository $sessions,
         private readonly SluggerInterface $slugger,
         private readonly LoggerInterface $logger,
-        // PROVISOIRE (QE-4 / QSO-3) : champ SmartOF qui désigne les formations vendues sur la boutique.
+        // PROVISOIRE (QSO-3) : champ SmartOF qui désigne les formations vendues sur la boutique.
         #[Autowire('%env(SMARTOF_FILTRE_BOUTIQUE)%')] private readonly string $filtreBoutique,
-        // PROVISOIRE (QE-28) : champ SmartOF qui désigne les formations éligibles au CPF.
+        // PROVISOIRE (QSO-18) : champ SmartOF qui désigne les formations éligibles au CPF.
         #[Autowire('%env(SMARTOF_FILTRE_CPF)%')] private readonly string $filtreCpf,
     ) {
     }
