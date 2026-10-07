@@ -17,15 +17,24 @@ if [ ! -f "$CLE" ]; then
     grep -q 'Host github.com' "$HOME/.ssh/config" || printf 'Host github.com\n    IdentityFile ~/.ssh/github_boutique\n    IdentitiesOnly yes\n' >> "$HOME/.ssh/config"
     chmod 600 "$HOME/.ssh/config"
 fi
-if ! ssh -o StrictHostKeyChecking=accept-new -T git@github.com 2>&1 | grep -q 'successfully authenticated'; then
+# « ssh -T git@github.com » sort toujours en erreur (GitHub refuse le shell), même authentifié :
+# on teste donc le message, pas le code de retour.
+github_ok() {
+    local sortie
+    sortie="$(ssh -o StrictHostKeyChecking=accept-new -T git@github.com 2>&1 || true)"
+    echo "$sortie"
+    grep -q 'successfully authenticated' <<<"$sortie"
+}
+if ! github_ok; then
     echo
     echo "Ajoute cette clé sur GitHub : dépôt coprotec/boutique → Settings → Deploy keys → Add deploy key"
     echo "(titre : vps-coprotec, NE PAS cocher « Allow write access ») :"
+    echo "(« Key is already in use » = déjà ajoutée : continue simplement)"
     echo
     cat "$CLE.pub"
     echo
     read -r -p "Appuie sur Entrée une fois la clé ajoutée..."
-    ssh -T git@github.com 2>&1 | grep 'successfully authenticated' || { echo "Accès GitHub refusé." >&2; exit 1; }
+    github_ok || { echo "Accès GitHub refusé." >&2; exit 1; }
 fi
 
 echo
