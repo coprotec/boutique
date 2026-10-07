@@ -223,43 +223,51 @@ La clé privée est effacée du serveur à la fin du script.
 
 Dans *Settings → Environments*, crée `preprod` et `prod`. Pour `prod`, active *Required reviewers*.
 
-Dans chaque environnement, ouvre aussi *Deployment branches and tags* : choisis *Selected branches* et autorise uniquement la branche du même nom (`preprod` pour l'environnement `preprod`, `prod` pour `prod`). Ainsi, aucune autre branche ne peut utiliser ces secrets pour déployer.
+Dans chaque environnement, ouvre aussi *Deployment branches and tags*, choisis *Selected branches*, puis autorise :
+- `preprod` pour l'environnement `preprod` ;
+- `main` pour l'environnement `prod`.
 
-### Une branche par environnement
+Ainsi, aucune autre branche ne peut utiliser ces secrets pour déployer.
+
+### Deux branches : `preprod` et `main` (= prod)
 
 | Branche | Effet d'un push | Dossier sur le serveur |
 |---|---|---|
-| `main` | tests uniquement | — |
-| `preprod` | tests puis déploiement de la préprod | `/srv/preprod.app.coprotec.net` (suit `preprod`) |
-| `prod` | tests, **ta validation**, puis déploiement de la prod | `/srv/app.coprotec.net` (suit `prod`) |
+| `preprod` | tests puis **déploiement automatique** de la préprod | `/srv/preprod.app.coprotec.net` (suit `preprod`) |
+| `main` | la **prod** : tests, **ta validation sur GitHub**, puis déploiement | `/srv/app.coprotec.net` (suit `main`) |
 
-`deploy.sh` refuse de déployer si le dossier n'est pas sur la branche de son environnement.
+`deploy.sh` refuse de déployer si le dossier n'est pas sur la bonne branche : `preprod` pour la préprod, `main` pour la prod.
 
-Mise en place des branches, une seule fois, sur ton poste :
+Tant que la prod n'est pas installée sur le serveur, **refuse** les déploiements de prod en attente : *Actions → le run → Review deployments → Reject*.
+
+Création de la branche `preprod`, une seule fois, sur ton poste :
 
 ```powershell
 git switch main; git pull
 git branch preprod; git push -u origin preprod      # déclenche le 1er déploiement automatique de la préprod
-git branch prod;    git push -u origin prod         # le déploiement attend ta validation : la REFUSER tant que la prod n'est pas installée
-git switch main
 ```
 
-Sur le serveur, si la préprod a été clonée sur `main` (étape 9 lancée avant la création des branches) :
+Sur le serveur, si la préprod a été clonée sur `main` (étape 9 lancée avant la création de la branche) :
 
 ```bash
 cd /srv/preprod.app.coprotec.net && git fetch origin && git switch preprod && git branch -D main
 ```
 
-Ensuite, au quotidien :
+Au quotidien :
 
 ```powershell
-# préprod : amener main dans preprod
-git switch preprod; git pull; git merge --ff-only main; git push; git switch main
-# prod (après validation en préprod) : amener preprod dans prod
-git switch prod; git pull; git merge --ff-only preprod; git push; git switch main
+# Travailler sur preprod : chaque push y est déployé automatiquement
+git switch preprod; git pull
+# … modifications, commits …
+git push
+
+# Mise en prod, une fois la préprod validée : amener preprod dans main (déploiement après ta validation)
+git switch main; git pull; git merge --ff-only preprod; git push; git switch preprod
 ```
 
-Pour relancer un déploiement sans nouveau code : *Actions → CI / déploiement → Run workflow*, en choisissant la branche `preprod` ou `prod`. À la main, depuis le serveur : `cd /srv/preprod.app.coprotec.net && bash deploy.sh preprod`.
+`--ff-only` garantit que la prod reçoit exactement ce qui a été testé en préprod. S'il refuse, c'est que `main` a reçu un commit qui n'est pas dans `preprod`. Dans ce cas, fusionne d'abord `main` dans `preprod`, teste, puis recommence.
+
+Pour relancer un déploiement sans nouveau code : *Actions → CI / déploiement → Run workflow*, en choisissant la branche `preprod` ou `main`. À la main, depuis le serveur : `cd /srv/preprod.app.coprotec.net && bash deploy.sh preprod`.
 
 ---
 
@@ -269,7 +277,7 @@ Pour relancer un déploiement sans nouveau code : *Actions → CI / déploiement
 
 ```bash
 sudo install -d -o coprotec -g coprotec /srv/app.coprotec.net
-git clone -b prod git@github.com:coprotec/boutique.git /srv/app.coprotec.net
+git clone -b main git@github.com:coprotec/boutique.git /srv/app.coprotec.net
 # .env.prod.local : vrais identifiants SmartOF / Monetico / Brevo, SMARTOF_FAKE=0, MONETICO_SIMULE=0, MONETICO_TEST=0
 sudo chown coprotec:www-data /srv/app.coprotec.net/.env.prod.local && sudo chmod 640 /srv/app.coprotec.net/.env.prod.local
 cd /srv/app.coprotec.net && bash deploy.sh prod        # écoute sur 127.0.0.1:8096

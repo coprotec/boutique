@@ -3,7 +3,7 @@
 #
 # Usage : bash deploy.sh <preprod|prod>
 # À lancer depuis la racine du checkout : /srv/preprod.app.coprotec.net (branche preprod)
-# ou /srv/app.coprotec.net (branche prod).
+# ou /srv/app.coprotec.net (branche main).
 # Sans interaction (appelable par GitHub Actions via SSH), code de sortie non nul en cas d'échec.
 set -euo pipefail
 
@@ -19,16 +19,17 @@ log() { echo "[$(date '+%H:%M:%S')] $*"; }
 
 [ -f "$ENV_FILE" ] || { echo "[ERREUR] $ENV_FILE manquant (secrets, cf. docker-compose.$ENV_NAME.yml)" >&2; exit 1; }
 
-# Une branche par environnement : le dossier de préprod suit « preprod », celui de prod suit « prod ».
+# Branche suivie : la préprod suit « preprod », la prod suit « main ».
+ATTENDUE="$([ "$ENV_NAME" = prod ] && echo main || echo preprod)"
 BRANCHE="$(git rev-parse --abbrev-ref HEAD)"
-if [ "$BRANCHE" != "$ENV_NAME" ]; then
-    echo "[ERREUR] Ce dossier est sur la branche « $BRANCHE », pas « $ENV_NAME »." >&2
-    echo "         Corriger : git fetch origin && git switch $ENV_NAME" >&2
+if [ "$BRANCHE" != "$ATTENDUE" ]; then
+    echo "[ERREUR] Ce dossier est sur la branche « $BRANCHE », la $ENV_NAME doit suivre « $ATTENDUE »." >&2
+    echo "         Corriger : git fetch origin && git switch $ATTENDUE" >&2
     exit 1
 fi
 
-log "Mise à jour du code (branche $ENV_NAME)"
-git pull --ff-only origin "$ENV_NAME"
+log "Mise à jour du code (branche $ATTENDUE)"
+git pull --ff-only origin "$ATTENDUE"
 
 log "Construction des images"
 $COMPOSE build --pull

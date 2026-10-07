@@ -1,16 +1,15 @@
-# Une branche par environnement :
-#   main     → tests uniquement (développement)
-#   preprod  → tests puis déploiement de la préprod (/srv/preprod.app.coprotec.net)
-#   prod     → tests puis déploiement de la prod (/srv/app.coprotec.net), après validation (environnement « prod »
-#              avec Required reviewers sur GitHub)
-# Relance manuelle : Actions → CI / déploiement → Run workflow, en choisissant la branche preprod ou prod.
+# Deux branches :
+#   preprod  → tests puis déploiement AUTOMATIQUE de la préprod (/srv/preprod.app.coprotec.net)
+#   main     → la prod : tests puis déploiement de la prod (/srv/app.coprotec.net) APRÈS VALIDATION
+#              (environnement GitHub « prod » avec Required reviewers)
+# Relance manuelle : Actions → CI / déploiement → Run workflow, en choisissant la branche preprod ou main.
 # Secrets GitHub : REMOTE_HOST, REMOTE_PORT (2268), REMOTE_USER (coprotec), REMOTE_KNOWN_HOSTS, SSH_PRIVATE_KEY.
 # Fournis par docker/vps/11-github-actions.sh (DEPLOIEMENT_VPS.md, étape 11).
 name: CI / déploiement
 
 on:
   push:
-    branches: [main, preprod, prod]
+    branches: [main, preprod]
   pull_request:
   workflow_dispatch:
 
@@ -33,9 +32,10 @@ jobs:
 
   deploy:
     needs: tests
-    if: github.event_name != 'pull_request' && (github.ref_name == 'preprod' || github.ref_name == 'prod')
+    if: github.event_name != 'pull_request' && (github.ref_name == 'preprod' || github.ref_name == 'main')
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name }}
+    # Branche main = environnement prod ; branche preprod = environnement preprod.
+    environment: ${{ github.ref_name == 'main' && 'prod' || 'preprod' }}
     # Jamais deux déploiements simultanés du même environnement.
     concurrency:
       group: deploy-${{ github.ref_name }}
@@ -43,9 +43,9 @@ jobs:
     steps:
       # La clé ne peut lancer qu'une commande (« deploy preprod » ou « deploy prod ») : commande forcée
       # ~coprotec/bin/deploy-gha.sh sur le serveur (docker/vps/deploy-gha.sh, installée par 11-github-actions.sh).
-      - name: Déploiement ${{ github.ref_name }}
+      - name: Déploiement ${{ github.ref_name == 'main' && 'prod' || 'preprod' }}
         env:
-          ENV_NAME: ${{ github.ref_name }}
+          ENV_NAME: ${{ github.ref_name == 'main' && 'prod' || 'preprod' }}
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           REMOTE_KNOWN_HOSTS: ${{ secrets.REMOTE_KNOWN_HOSTS }}
         run: |
