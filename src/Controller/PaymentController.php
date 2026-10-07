@@ -43,7 +43,7 @@ final class PaymentController extends AbstractController
 
     /**
      * Notification serveur à serveur de Monetico (« interface de retour », URL à déclarer chez Monetico).
-     * Accessible sans authentification même en préprod (cf. vhost Nginx).
+     * Accessible sans authentification même en préprod (cf. docker/apache-hote/).
      */
     #[Route('/paiement/monetico/notification', name: 'paiement_notification', methods: ['POST'], priority: 10)]
     public function notification(Request $request, PaymentValidator $validation): Response

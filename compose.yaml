@@ -9,7 +9,7 @@ services:
     ports:
       - "8083:80"
     volumes:
-      - .:/var/www/boutique
+      - .:/var/www/app.coprotec.net/httpdocs
     environment:
       APP_ENV: dev
       DATABASE_URL: "mysql://boutique:boutique@mysql:3306/boutique?serverVersion=8.0.32&charset=utf8mb4"

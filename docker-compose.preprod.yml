@@ -1,5 +1,5 @@
-# Préprod : preprod.app.coprotec.net, sur le VPS de coplanif, dossier /srv/preprod.app.coprotec.net.
-# Nginx de l'hôte (docker/nginx/preprod.app.coprotec.net.conf) → 127.0.0.1:8095 → Apache du conteneur.
+# Préprod : preprod.app.coprotec.net, sur le VPS actuel de boutique-old, dossier /srv/preprod.app.coprotec.net.
+# Apache de l'hôte (docker/apache-hote/preprod.app.coprotec.net.conf) → 127.0.0.1:8095 → Apache du conteneur.
 #
 # Secrets et réglages dans .env.preprod.local (non versionné), monté comme .env.local de Symfony :
 #   APP_ENV=prod, APP_SECRET, DATABASE_URL (hôte « mysql »), MYSQL_ROOT_PASSWORD, MYSQL_PASSWORD,
@@ -17,9 +17,9 @@ services:
     ports:
       - "127.0.0.1:8095:80"
     volumes:
-      - ./.env.preprod.local:/var/www/boutique/.env.local:ro
-      - ./var/log:/var/www/boutique/var/log
-      - ./var/smartof-fake:/var/www/boutique/var/smartof-fake  # SMARTOF_FAKE=1 : inscriptions simulées partagées app/cron
+      - ./.env.preprod.local:/var/www/app.coprotec.net/httpdocs/.env.local:ro
+      - ./var/log:/var/www/app.coprotec.net/httpdocs/var/log
+      - ./var/smartof-fake:/var/www/app.coprotec.net/httpdocs/var/smartof-fake  # SMARTOF_FAKE=1 : inscriptions simulées partagées app/cron
     depends_on:
       - mysql
 
@@ -31,14 +31,16 @@ services:
     container_name: boutique_preprod_cron
     restart: unless-stopped
     volumes:
-      - ./.env.preprod.local:/var/www/boutique/.env.local:ro
-      - ./var/log:/var/www/boutique/var/log
-      - ./var/smartof-fake:/var/www/boutique/var/smartof-fake  # SMARTOF_FAKE=1 : inscriptions simulées partagées app/cron
+      - ./.env.preprod.local:/var/www/app.coprotec.net/httpdocs/.env.local:ro
+      - ./var/log:/var/www/app.coprotec.net/httpdocs/var/log
+      - ./var/smartof-fake:/var/www/app.coprotec.net/httpdocs/var/smartof-fake  # SMARTOF_FAKE=1 : inscriptions simulées partagées app/cron
     depends_on:
       - mysql
 
   mysql:
     image: mysql:8.0
+    # VPS 2 Go partagé avec boutique-old pendant la transition : MySQL réduit au nécessaire (petite base).
+    command: ["--innodb-buffer-pool-size=128M", "--performance-schema=OFF", "--max-connections=50", "--skip-name-resolve"]
     container_name: boutique_preprod_mysql
     restart: unless-stopped
     env_file:

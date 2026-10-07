@@ -1,4 +1,4 @@
-# Prod : domaine actuel de boutique-old (bascule à la mise en ligne, QE-34), sur le VPS de coplanif.
+# Prod : domaine actuel de boutique-old (bascule à la mise en ligne, QE-34), sur le VPS actuel de boutique-old.
 # Même organisation que la préprod (cf. docker-compose.preprod.yml), secrets dans .env.prod.local (non versionné) :
 # SmartOF de production, Monetico de production (MONETICO_TEST=0, MONETICO_SIMULE=0).
 name: boutique_prod
@@ -14,8 +14,8 @@ services:
     ports:
       - "127.0.0.1:8096:80"
     volumes:
-      - ./.env.prod.local:/var/www/boutique/.env.local:ro
-      - ./var/log:/var/www/boutique/var/log
+      - ./.env.prod.local:/var/www/app.coprotec.net/httpdocs/.env.local:ro
+      - ./var/log:/var/www/app.coprotec.net/httpdocs/var/log
     depends_on:
       - mysql
 
@@ -27,13 +27,15 @@ services:
     container_name: boutique_prod_cron
     restart: unless-stopped
     volumes:
-      - ./.env.prod.local:/var/www/boutique/.env.local:ro
-      - ./var/log:/var/www/boutique/var/log
+      - ./.env.prod.local:/var/www/app.coprotec.net/httpdocs/.env.local:ro
+      - ./var/log:/var/www/app.coprotec.net/httpdocs/var/log
     depends_on:
       - mysql
 
   mysql:
     image: mysql:8.0
+    # VPS 2 Go partagé avec boutique-old pendant la transition : MySQL réduit au nécessaire (petite base).
+    command: ["--innodb-buffer-pool-size=128M", "--performance-schema=OFF", "--max-connections=50", "--skip-name-resolve"]
     container_name: boutique_prod_mysql
     restart: unless-stopped
     env_file:

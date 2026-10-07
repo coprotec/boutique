@@ -1,4 +1,4 @@
-# Image de la boutique : Apache + PHP dans le conteneur, Nginx de l'hôte en reverse proxy (cf. CAHIER_DES_CHARGES.md §10).
+# Image de la boutique : Apache + PHP dans le conteneur, Apache de l'hôte en reverse proxy (cf. DEPLOIEMENT_VPS.md).
 
 # ----------- BASE : PHP + Apache + extensions (utilisée telle quelle en dev, code monté en volume)
 FROM php:8.3-apache AS base
@@ -18,7 +18,7 @@ RUN a2enmod rewrite headers
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/99-boutique.ini
 COPY docker/apache/vhost.conf /etc/apache2/sites-available/000-default.conf
 
-WORKDIR /var/www/boutique
+WORKDIR /var/www/app.coprotec.net/httpdocs
 
 # ----------- ASSETS : compilation Webpack Encore (Node uniquement au build)
 FROM node:22-slim AS assets

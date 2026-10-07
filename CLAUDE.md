@@ -25,7 +25,7 @@ When in doubt about the reservation/payment flow (pricing, VAT, reservation step
 - PHP 8.2+, Symfony 7.x
 - Doctrine ORM, MySQL
 - Vue.js 3 for interactive UI parts, built with **Webpack Encore**. Organisation copied from `/coplanif`: single `vue` entry (`assets/vue/vue.js`) holding the component registry, components in domain folders (`assets/vue/reservation/`, `assets/vue/tool/FormType/`). **Deliberate difference:** no global `<div id="app">` compiled in the browser (public site: user-entered text echoed by Twig would be evaluated by Vue = template injection). Each component mounts on its own element: `<div data-vue="reservation-form" data-props="{{ props|json_encode|e('html_attr') }}">`, runtime-only Vue build.
-- Docker: app container on `php:8.x-apache` (Apache inside the container, like `/coplanif`) + MySQL 8. On the VPS, **Nginx on the host** is the reverse proxy (HTTPS, basic auth/IP allowlist for préprod) in front of the container port
+- Docker: app container on `php:8.x-apache` (Apache inside the container, like `/coplanif`) + MySQL 8. On the VPS, the **host's existing Apache** (the one serving `boutique-old`) is the reverse proxy (HTTPS, basic auth/IP allowlist for préprod) in front of the container port
 - Environments: dev (local Docker), préprod (must support end-to-end Monetico test-mode payment + reservation runs), prod
 - Payment: **Monetico** retained (ported/refined from `boutique-old`), plus offline methods (wire, cheque, third-party financing) kept from day one
 
@@ -35,6 +35,7 @@ None of this is scaffolded yet. When starting the Symfony skeleton, keep depende
 
 - **Stay sober.** This project exists specifically to avoid the complexity of `boutique-sf`. Don't add abstractions, bundles, or infrastructure "for later" — build only what the current confirmed scope requires.
 - **Don't guess scope.** If a feature isn't in `CAHIER_DES_CHARGES.md` §5.2 (MVP périmètre) or hasn't been explicitly requested, ask rather than porting it over from `boutique-sf` or `boutique-old` by default.
+- **Naming:** PHP class names, namespaces, business methods and console commands (`app:catalog:sync`…) are in **English**. Entity properties, getters/setters, DB tables/columns, comments, user-facing text and public URLs (`/formation`, `/reservation`) stay in French. `SmartofClient` methods mirror SmartOF API resource names (`sessionsOuvertes()`…). UI work follows the `design-boutique` skill (`.claude/skills/`).
 - Update `CAHIER_DES_CHARGES.md` as decisions get made (§13 Décisions actées / §15 Points ouverts, §14 plan by lots) so it stays the current source of truth for scope.
 
 ## External integration
@@ -51,4 +52,13 @@ Old reservations live in `boutique-old`'s MySQL database; the structure is captu
 
 ## Deployment
 
-Hosted on the `/coplanif` VPS: host **Nginx** reverse proxy → app container (Apache inside) on a localhost port. Préprod `preprod.app.coprotec.net` (restricted access except the Monetico notification URL), prod on `boutique-old`'s current domain. Deploy via `deploy.sh <preprod|prod>` modelled on `/coplanif` (GitHub Actions over SSH). See `CAHIER_DES_CHARGES.md` §10–11.
+Hosted on `boutique-old`'s current VPS (Ubuntu 22.04, 2 GB RAM, SSH on port 2268), where both shops coexist until the switch-over: host **Apache** reverse proxy → app container (Apache inside) on 127.0.0.1:8095 (préprod) / 8096 (prod). Step-by-step server procedure: `DEPLOIEMENT_VPS.md`. Préprod `preprod.app.coprotec.net` (restricted access except the Monetico notification URL), prod on `boutique-old`'s current domain. Deploy via `deploy.sh <preprod|prod>` modelled on `/coplanif` (GitHub Actions over SSH). See `CAHIER_DES_CHARGES.md` §10–11.
+
+## Commands
+
+- Dev stack: `docker compose up -d --build` → http://localhost:8083 (Mailpit: http://localhost:8025). Front: `npm run watch`.
+- DB: `php bin/console doctrine:migrations:migrate` (MySQL). Tests run on SQLite (`.env.test`): `php bin/phpunit`.
+- Catalogue: `php bin/console app:catalog:sync`. Cron (see `docker/cron/crontab`): `app:orders:expire` every minute, `app:smartof:send [numero]` every 5 min (also for manual retry after an alert).
+- Without credentials: `SMARTOF_FAKE=1` serves SmartOF from `fixtures/smartof/$SMARTOF_FAKE_FIXTURES` (`demo_api.json` demo catalogue for dev/préprod, `fake_api.json` pinned for tests; writes kept in `var/smartof-fake/<env>.json`); `MONETICO_SIMULE=1` (set in `.env.dev`) replaces the Monetico page with a local simulator that posts a signed notification.
+- Préprod / prod: `bash deploy.sh <preprod|prod>` on the VPS; secrets in `.env.<env>.local`, mounted as `.env.local`; host Apache vhost in `docker/apache-hote/`.
+- Every business assumption awaiting an answer is marked `PROVISOIRE (QE-n / QSO-n)` in code and `.env` — grep for it when answers come back in `QUESTIONS_EQUIPES.md`.

@@ -1,6 +1,6 @@
 # Cahier des charges — Refonte "Boutique" COPROTEC (MVP)
 
-> Statut (2026-09-29) : cadrage technique v1 bouclé, doc API SmartOF v2 étudiée, lot 1 (socle) réalisé. Les points encore ouverts sont des questions aux équipes (**QE-n**) et à l'éditeur SmartOF (**QSO-n**), regroupées dans [`QUESTIONS_EQUIPES.md`](QUESTIONS_EQUIPES.md). Ce cahier y renvoie par leur numéro.
+> Statut (2026-10-02) : cadrage technique v1 bouclé, doc API SmartOF v2 étudiée, lot 1 (socle) réalisé. Les points encore ouverts sont des questions aux équipes (**QE-n**) et à l'éditeur SmartOF (**QSO-n**), regroupées dans [`QUESTIONS_EQUIPES.md`](QUESTIONS_EQUIPES.md). Ce cahier y renvoie par leur numéro.
 
 ## 1. Contexte
 
@@ -40,7 +40,7 @@ L'objectif est de repartir sur une base **technique volontairement plus simple**
 | Build assets | Webpack Encore | Organisation de `/coplanif` : entrée `vue` unique (`assets/vue/vue.js`, registre des composants), composants rangés par domaine. Différence voulue : chaque composant est monté sur son propre élément (`data-vue`), pas de `<div id="app">` global compilé dans le navigateur, pour éviter l’injection de template sur un site public |
 | Base de données | MySQL | Copie locale du catalogue SmartOF + commandes de la boutique |
 | Environnement dev | Docker | Conteneur app (php-apache) exposé en local + MySQL |
-| Serveur web | Nginx sur l’hôte (reverse proxy, HTTPS) + Apache dans le conteneur (image `php:8.x-apache`) | Même organisation que `coplanif` |
+| Serveur web | Apache de l’hôte (reverse proxy, HTTPS ; déjà en place pour `boutique-old`) + Apache dans le conteneur (image `php:8.x-apache`) | Pas de Nginx : l’Apache existant tient les ports 80/443 et permet la bascule sans coupure |
 | Tâches planifiées | Commandes Symfony (cron) | Synchro catalogue, expiration des blocages de places, relances d'envoi SmartOF |
 
 ## 5. Fonctionnalités
@@ -84,24 +84,24 @@ La boutique est une **vitrine + tunnel de paiement**. Une réservation payée de
   - France Travail (ex-Pôle emploi) : identifiant demandeur d'emploi obligatoire (format de `boutique-old`), mode de paiement « financement ».
   - CPF : proposé seulement pour certaines formations. Il redirige vers moncompteformation.gouv.fr, sans réservation dans la boutique. Dans `boutique-old`, la seule formation concernée était codée en dur (`T68-25`). Ici, l'éligibilité doit venir de SmartOF, par exemple une case « Éligible CPF » sur le produit (QE-28).
   - Financement en plusieurs parties (tiers + reste à charge) : QE-13.
-- **Prix :** repris de SmartOF (`presetTarification` du produit, HT + TVA). Un produit peut avoir plusieurs tarifs : le tarif à appliquer reste à arrêter (QE-10, QSO-4). Total = prix unitaire × nombre de participants. Affichage HT/TTC et frais annexes : QE-11, QE-12.
+- **Prix :** repris de SmartOF (`presetTarification` du produit, HT + TVA). **Prix unique par formation** (QE-10, tranchée) : même prix pour tous les clients et toutes les sessions ; lecture exacte dans l'API à confirmer (QSO-4). Total = prix unitaire × nombre de participants. Affichage HT/TTC et frais annexes : QE-11, QE-12.
 
 ### 5.4 Places et blocage
 
 Une place n'est prise que par une réservation **payée** (ou engagée, pour le virement et le chèque : QE-8). Il n'y a pas de demande en attente de validation.
 
 - **Places disponibles** = limite SmartOF − inscrits SmartOF − places bloquées ou payées dans la boutique mais pas encore transmises.
-- **Blocage temporaire :** au passage au paiement, la boutique bloque les N places pendant un délai limité (proposition : 30 min, QE-7). Sans paiement dans ce délai, les places sont libérées.
+- **Blocage temporaire :** au passage au paiement, la boutique bloque les N places pendant un délai limité : **30 min**, réglable (`BOUTIQUE_BLOCAGE_PAIEMENT_MINUTES`) ; décision technique de l'équipe de développement (ex-QE-7, retirée du questionnaire). Sans paiement dans ce délai, les places sont libérées.
 - **Réservations simultanées :** le calcul et le blocage se font sous verrou en base, sur la session. Exemple : il reste 6 places et deux réservations de 4 arrivent en même temps. La première bloque ses 4 places ; la seconde est arrêtée **avant paiement** avec un message clair (« il ne reste que 2 places »), et le client peut réduire son nombre de participants.
 - **Contrôle en direct :** les places restantes sont revérifiées auprès de SmartOF (`GET /v2/sessions_ouvertes`) juste avant le paiement, pour tenir compte des inscriptions faites directement dans SmartOF.
-- **Surréservation résiduelle :** un paiement reste possible sur une session remplie entre-temps par un autre canal. La boutique la détecte à l'envoi et alerte le service formation ; la conduite à tenir est définie en QE-9.
+- **Surréservation résiduelle :** un paiement reste possible sur une session remplie entre-temps par un autre canal. La boutique la détecte à l'envoi et alerte le service formation et la comptabilité ; le client est **remboursé par virement** (QE-9, tranchée).
 
 ### 5.5 Paiement
 
 - **Paiement au moment de la réservation**, comme `boutique-old`.
 - **CB : Monetico**, repris et amélioré depuis `boutique-old` (POST signé HMAC-SHA1 vers `p.monetico-services.com`, cf. `../boutique-old/view/reservation/etape3.inc.php`). Un environnement de test Monetico reste utilisable en permanence en préprod.
   - Le paiement n'est considéré comme validé qu'à réception de la **notification serveur à serveur de Monetico** (URL de retour « CGI2 », signature vérifiée). Le retour du navigateur du client sert seulement à l'affichage : il ne suffit pas à valider.
-  - Référence de commande unique, envoyée à Monetico et reprise dans SmartOF (`customId`). Format proposé : `BTQ-AAAAMMJJ-NNNN`.
+  - Référence de commande unique, envoyée à Monetico et reprise dans SmartOF (`customId`). Format : `BQ` + AAMMJJ + 4 caractères, ex. `BQ260930K7X2` (12 caractères, limite de la référence Monetico).
 - **Virement, chèque, financement tiers :** conservés dès le MVP. Suivi de la réception et délai de paiement : QE-14, QE-15.
 - **Factures :** émises par SmartOF, rien à faire dans la boutique. La boutique transmet seulement l'information de paiement à SmartOF (QSO-7).
 - **Annulation, remboursement, rétractation :** gérés par la comptabilité (avoirs ou remboursements directs). Règles et options pour décharger la compta : QE-16 à QE-18.
@@ -124,9 +124,26 @@ Une place n'est prise que par une réservation **payée** (ou engagée, pour le 
 | Pages légales | Mentions légales, CGV, politique de confidentialité (QE-27). |
 | Erreurs | Session complète ou fermée, formation introuvable, erreur de paiement. |
 
+**Lieu :** affiché sur chaque session et rappelé dans le bandeau du tunnel, avec un lien « Itinéraire » (Google Maps) pour les lieux physiques. Pas de carte intégrée : elle déposerait des cookies tiers et imposerait un bandeau de consentement, pour un gain faible puisque la plupart des sessions ont lieu au même endroit. Adresse exacte des salles : QSO-16. **Pas d'images** de formation en v1 (direction visuelle typographique, images SmartOF : QSO-10).
+
 Une seule langue (français). Le site doit s'afficher correctement sur mobile.
 
-### 5.8 Hors v1
+### 5.8 Session privée (intra) — lien d'inscription sans mot de passe + QR code
+
+Fonction **prévue, non développée** : son intérêt et ses règles dépendent de QE-37 (et QSO-15 côté SmartOF).
+
+- **Besoin :** une entreprise réserve une session entière pour ses seuls salariés (ex. Leroy Merlin). Cette session ne doit pas apparaître au catalogue public.
+- **Principe proposé :**
+  1. Le service formation crée la session dans SmartOF, sans la publier au catalogue (QSO-15).
+  2. La boutique génère pour cette session un **lien privé** : URL contenant un jeton aléatoire long, non devinable, sans compte ni mot de passe. Le jeton peut être révoqué et expire à la date limite de réservation de la session.
+  3. La boutique produit le **QR code** de ce lien (image à imprimer ou à joindre au mail envoyé à l'entreprise).
+  4. Le lien ouvre le formulaire de réservation habituel, pré-rempli et verrouillé sur la session et l'entreprise ; seuls les participants restent à saisir. Le contrôle des places, la transmission à SmartOF et le `customId` restent identiques à une réservation normale.
+  5. Paiement : CB Monetico, virement, ou au choix selon QE-37 b. Prix : catalogue par participant ou forfait selon QE-37 c.
+- **Création du lien :** pas de back-office en v1, donc une commande console (`app:session-privee:creer <session SmartOF> <entreprise>`) qui affiche l'URL et enregistre le QR code. Un écran d'administration viendra avec le back-office.
+- **Sécurité :** jeton d'au moins 128 bits, page non indexée (`noindex`), limitation de débit sur l'URL. Quiconque possède le lien peut inscrire des participants : c'est accepté, le nombre de places de la session borne l'effet d'une fuite.
+- **Ouvert :** qui inscrit (un responsable pour le groupe, ou chaque salarié via le QR code : QE-37 d). Dans le second cas, chaque scan crée une réservation d'un participant, et le paiement par participant en CB devient peu adapté (plutôt virement global de l'entreprise).
+
+### 5.9 Hors v1
 
 Compte client et connexion (y compris via SmartOF, non faisable par l'API aujourd'hui : QSO-11), codes promo, back-office, regroupement avancé du catalogue.
 
@@ -236,8 +253,8 @@ Même organisation que `/coplanif`, qui tourne déjà en préprod et en prod :
 | Environnement | Hébergement | SmartOF | Monetico |
 |---|---|---|---|
 | dev | Docker local (app php-apache + MySQL 8) | Instance de test (QSO-1) | Mode test |
-| préprod (`preprod.app.coprotec.net`) | VPS de `coplanif`, `docker-compose.preprod.yml`, conteneur Apache derrière le Nginx de l’hôte (vhost + certificat Let’s Encrypt), dossier `/srv/preprod.app.coprotec.net` | Instance de test | Mode test (`p.monetico-services.com/test/`) |
-| prod (même domaine que `boutique-old`) | VPS de `coplanif`, `docker-compose.prod.yml` | Production | Production |
+| préprod (`preprod.app.coprotec.net`) | VPS actuel de `boutique-old`, `docker-compose.preprod.yml`, conteneur derrière l’Apache de l’hôte (vhost `docker/apache-hote/`, certificat Let’s Encrypt existant réutilisé), dossier `/srv/preprod.app.coprotec.net` | Instance de test | Mode test (`p.monetico-services.com/test/`) |
+| prod (`app.coprotec.net`, domaine de `boutique-old`) | Même VPS, `docker-compose.prod.yml` (127.0.0.1:8096) ; bascule = le vhost Apache de `app.coprotec.net` passe de `boutique-old` au conteneur | Production | Production |
 
 - Déploiement par un script `deploy.sh <preprod|prod>` (build, migrations, cache), déclenchable par GitHub Actions via SSH, comme `coplanif`.
 - Tâches planifiées (cron du conteneur ou du VPS) :
@@ -257,7 +274,7 @@ Même organisation que `/coplanif`, qui tourne déjà en préprod et en prod :
 | Identifiants Monetico de test et de prod (TPE, clé, code société) | Décidé : ceux de `boutique-old` (même TPE). Nouvelle URL de notification à déclarer chez Monetico ; valeurs à fournir dans `.env.local` (non versionné) | Porteur du projet / banque |
 | Compte Brevo (clé API, expéditeur) | Décidé : celui de `boutique-old` ; valeurs dans `.env.local` | Porteur du projet |
 | Noms de domaine préprod et prod, certificats HTTPS | Décidé : préprod `preprod.app.coprotec.net`, prod = domaine actuel de `boutique-old` (bascule à la mise en ligne). DNS et certificat préprod à créer | Porteur du projet |
-| Serveur (VPS) préprod/prod | Décidé : VPS de `coplanif` | Porteur du projet |
+| Serveur (VPS) préprod/prod | Décidé : VPS actuel de `boutique-old` (Ubuntu 22.04, 2 Go de RAM), procédure dans `DEPLOIEMENT_VPS.md` | Porteur du projet |
 | Dépôt GitHub privé `boutique` + accès SSH pour le déploiement | À créer | Porteur du projet |
 | Charte graphique (logo HD, couleurs, typographies) | Par défaut, celle de `boutique-old` : Bootstrap, Open Sans, bleu `#0071C2`, logo `assets/images/logo.png`. Alignement éventuel sur le site vitrine : QE-32 | Communication |
 | Textes (CGV, mentions légales, emails, confirmation) | À fournir (QE-27, QE-33). Ceux de `boutique-old` servent de base provisoire. | Équipes |
@@ -265,15 +282,15 @@ Même organisation que `/coplanif`, qui tourne déjà en préprod et en prod :
 ## 12. Livrables
 
 - Dépôt Git dédié (privé), préparé en local ; dépôt GitHub distant à créer le moment venu.
-- Environnement Docker de dev (app php-apache + MySQL) ; vhost Nginx de l’hôte fourni pour la préprod et la prod.
+- Environnement Docker de dev (app php-apache + MySQL) ; vhost Apache de l’hôte fourni pour la préprod (`docker/apache-hote/`) ; procédure serveur `DEPLOIEMENT_VPS.md`.
 - Environnements préprod (Monetico en mode test + instance SmartOF de test) et prod, avec `deploy.sh`.
 - Documentation : ce cahier des charges, [`QUESTIONS_EQUIPES.md`](QUESTIONS_EQUIPES.md), `CLAUDE.md`.
 
 ## 13. Décisions actées
 
 - [x] Nom du dépôt : `boutique` (nouveau) ; l'ancien est renommé `boutique-old` ; les deux sont privés.
-- [x] Stack : Symfony 7.4 + Vue 3 (composants ciblés via Webpack Encore, pattern `/coplanif`) + Doctrine ORM + MySQL ; Nginx en reverse proxy sur l’hôte, Apache dans le conteneur ; environnements dev Docker, préprod, prod.
-- [x] Hébergement : VPS de `coplanif` ; préprod `preprod.app.coprotec.net` (accès restreint par auth basique + IP, sauf l’URL de notification Monetico) ; prod sur le domaine actuel de `boutique-old`.
+- [x] Stack : Symfony 7.4 + Vue 3 (composants ciblés via Webpack Encore, pattern `/coplanif`) + Doctrine ORM + MySQL ; Apache de l’hôte en reverse proxy (celui de `boutique-old`), Apache dans le conteneur ; environnements dev Docker, préprod, prod.
+- [x] Hébergement : VPS actuel de `boutique-old`, où les deux boutiques cohabitent jusqu’à la bascule ; préprod `preprod.app.coprotec.net` (accès restreint par auth basique + IP, sauf l’URL de notification Monetico) ; prod sur le domaine actuel de `boutique-old`.
 - [x] Monetico et Brevo : accès de `boutique-old` réutilisés.
 - [x] ERP : Navision abandonné, remplacé par **SmartOF** (API v2).
 - [x] But v1 : afficher et rendre réservables et payables **les seules formations COPROTEC** présentes dans SmartOF.
@@ -288,28 +305,33 @@ Même organisation que `/coplanif`, qui tourne déjà en préprod et en prod :
 - [x] Instance SmartOF de test dédiée pour dev et préprod (à obtenir : QSO-1).
 - [x] Échec d'envoi à SmartOF : file de relances automatiques + email d'alerte.
 - [x] Administration SmartOF (clé API, champs personnalisés) : porteur du projet (DSI).
+- [x] Blocage des places pendant le paiement CB : 30 min, réglable ; décision technique (ex-QE-7).
+- [x] Surréservation résiduelle : remboursement du client par virement (QE-9).
+- [x] Prix : unique par formation, repris de SmartOF ; pas de tarif par type de client ni par session (QE-10).
 
 ## 14. Plan de réalisation
 
 Construction de l'application complète, lot par lot, jusqu'à une préprod testable. Tant qu'une QE ou une QSO n'a pas de réponse, le code utilise une **valeur par défaut provisoire**, isolée en configuration et signalée par un commentaire `// PROVISOIRE (QE-n)`.
 
-| Lot | Contenu | Dépend de |
-|---|---|---|
-| 1. Socle | Squelette Symfony 7.4, Docker dev (php-apache + MySQL), Encore + Vue 3, gabarit de page (charte `boutique-old`) | — |
-| 2. Catalogue | Entités `Formation` / `Session`, client API SmartOF, commande de synchro (filtre COPROTEC configurable), SmartOF simulé en dev, pages catalogue et fiche | QE-4, QSO-1, QSO-3 (valeurs provisoires en attendant) |
-| 3. Réservation | Formulaire (participants dynamiques en Vue), validations, `Commande` / `Participant`, blocage des places avec verrou, expiration | QE-3, QE-7, QE-8 |
-| 4. Paiement | Monetico (aller + notification serveur), virement / chèque / France Travail, emails via Brevo | Accès Monetico de test |
-| 5. Envoi SmartOF | Entreprise, apprenants, commanditaire ; file de relances ; alertes | QE-23, QSO-5, QSO-12 |
-| 6. Préprod | `docker-compose.preprod.yml`, `deploy.sh`, cron, vhost Nginx de l'hôte, GitHub Actions | Dépôt GitHub, DNS `preprod.app.coprotec.net` |
-| 7. Recette | Parcours complets en préprod avec les équipes | QE-35 |
+| Lot | Contenu | Dépend de | État (2026-09-30) |
+|---|---|---|---|
+| 1. Socle | Squelette Symfony 7.4, Docker dev (php-apache + MySQL), Encore + Vue 3, gabarit de page (charte `boutique-old`) | — | Fait |
+| 2. Catalogue | Entités `Formation` / `Session`, client API SmartOF, commande de synchro (filtre COPROTEC configurable), SmartOF simulé en dev, pages catalogue et fiche | QE-4, QSO-1, QSO-3 (valeurs provisoires en attendant) | Fait (SmartOF simulé) |
+| 3. Réservation | Formulaire (participants dynamiques en Vue), validations, `Commande` / `Participant`, blocage des places avec verrou, expiration | QE-3, QE-8 | Fait |
+| 4. Paiement | Monetico (aller + notification serveur), virement / chèque / France Travail, emails via Brevo | Accès Monetico de test | Fait (simulateur Monetico en dev) |
+| 5. Envoi SmartOF | Entreprise, apprenants, commanditaire ; file de relances ; alertes | QE-23, QSO-5, QSO-12 | Fait (SmartOF simulé) |
+| 6. Préprod | `docker-compose.preprod.yml`, `deploy.sh`, cron, vhost Apache de l'hôte, GitHub Actions | Dépôt GitHub, DNS `preprod.app.coprotec.net` | Fichiers prêts, non déployé |
+| 7. Recette | Parcours complets en préprod avec les équipes | QE-35 | À faire |
+| 8. Session privée (intra) | Lien d'inscription privé à jeton (sans mot de passe), QR code, commande console de création, formulaire verrouillé sur la session et l'entreprise (§5.8) | QE-37, QSO-15 | Prévu, à confirmer |
 
 ## 15. Points ouverts
 
 Voir [`QUESTIONS_EQUIPES.md`](QUESTIONS_EQUIPES.md) et les prérequis techniques du §11. Questions bloquantes pour le développement :
 
 - **QE-4 / QSO-3** : critère d'identification des formations COPROTEC, qui conditionne la synchro du catalogue.
-- **QE-10 / QSO-4 / QSO-13** : tarif à appliquer et limite de places qui fait foi, qui conditionnent le calcul du prix et des places.
-- **QE-7, QE-8** : délai de blocage des places, et blocage ou non pour le virement, le chèque et le financement France Travail.
+- **QSO-4 / QSO-13** : lecture du prix unique dans l'API et limite de places qui fait foi, qui conditionnent le calcul du prix et des places.
+- **QE-8** : blocage ou non des places pour le virement, le chèque et le financement France Travail.
+- **QE-37 / QSO-15** : sessions privées (intra), qui conditionnent le lot 8.
 - **QE-23** : liste des champs personnalisés à créer dans SmartOF, qui conditionne l'envoi des inscriptions.
 - **QSO-1** : instance de test, qui conditionne les tests d'intégration.
 

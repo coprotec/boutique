@@ -1,0 +1,5 @@
+# Fichiers exécutés sous Linux (VPS, conteneurs) : toujours en fins de ligne LF, même depuis Windows.
+*.sh                text eol=lf
+docker/cron/crontab text eol=lf
+docker/**/*.conf    text eol=lf
+Dockerfile          text eol=lf

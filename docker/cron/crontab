@@ -4,11 +4,11 @@ SHELL=/bin/sh
 
 # Synchro du catalogue SmartOF, chaque jour tôt le matin (décision de cadrage). À la demande :
 #   docker compose -f docker-compose.<env>.yml exec app php bin/console app:catalog:sync
-30 5 * * * www-data cd /var/www/boutique && php bin/console app:catalog:sync --no-interaction >> var/log/cron.log 2>&1
+30 5 * * * www-data cd /var/www/app.coprotec.net/httpdocs && php bin/console app:catalog:sync --no-interaction >> var/log/cron.log 2>&1
 
 # Libération des places des paiements CB non aboutis dans le délai.
-* * * * * www-data cd /var/www/boutique && php bin/console app:orders:expire --no-interaction >> var/log/cron.log 2>&1
+* * * * * www-data cd /var/www/app.coprotec.net/httpdocs && php bin/console app:orders:expire --no-interaction >> var/log/cron.log 2>&1
 
 # Relance des inscriptions SmartOF en échec temporaire.
-*/5 * * * * www-data cd /var/www/boutique && php bin/console app:smartof:send --no-interaction >> var/log/cron.log 2>&1
+*/5 * * * * www-data cd /var/www/app.coprotec.net/httpdocs && php bin/console app:smartof:send --no-interaction >> var/log/cron.log 2>&1
 
