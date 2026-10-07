@@ -223,11 +223,43 @@ La clé privée est effacée du serveur à la fin du script.
 
 Dans *Settings → Environments*, crée `preprod` et `prod`. Pour `prod`, active *Required reviewers*.
 
-Ensuite, chaque push sur `main` lance les tests puis déploie la préprod. La prod se lance à la main (*Run workflow → prod*). Pour déployer la préprod à la main :
+Dans chaque environnement, ouvre aussi *Deployment branches and tags* : choisis *Selected branches* et autorise uniquement la branche du même nom (`preprod` pour l'environnement `preprod`, `prod` pour `prod`). Ainsi, aucune autre branche ne peut utiliser ces secrets pour déployer.
+
+### Une branche par environnement
+
+| Branche | Effet d'un push | Dossier sur le serveur |
+|---|---|---|
+| `main` | tests uniquement | — |
+| `preprod` | tests puis déploiement de la préprod | `/srv/preprod.app.coprotec.net` (suit `preprod`) |
+| `prod` | tests, **ta validation**, puis déploiement de la prod | `/srv/app.coprotec.net` (suit `prod`) |
+
+`deploy.sh` refuse de déployer si le dossier n'est pas sur la branche de son environnement.
+
+Mise en place des branches, une seule fois, sur ton poste :
+
+```powershell
+git switch main; git pull
+git branch preprod; git push -u origin preprod      # déclenche le 1er déploiement automatique de la préprod
+git branch prod;    git push -u origin prod         # le déploiement attend ta validation : la REFUSER tant que la prod n'est pas installée
+git switch main
+```
+
+Sur le serveur, si la préprod a été clonée sur `main` (étape 9 lancée avant la création des branches) :
 
 ```bash
-cd /srv/preprod.app.coprotec.net && bash deploy.sh preprod
+cd /srv/preprod.app.coprotec.net && git fetch origin && git switch preprod && git branch -D main
 ```
+
+Ensuite, au quotidien :
+
+```powershell
+# préprod : amener main dans preprod
+git switch preprod; git pull; git merge --ff-only main; git push; git switch main
+# prod (après validation en préprod) : amener preprod dans prod
+git switch prod; git pull; git merge --ff-only preprod; git push; git switch main
+```
+
+Pour relancer un déploiement sans nouveau code : *Actions → CI / déploiement → Run workflow*, en choisissant la branche `preprod` ou `prod`. À la main, depuis le serveur : `cd /srv/preprod.app.coprotec.net && bash deploy.sh preprod`.
 
 ---
 
@@ -237,7 +269,7 @@ cd /srv/preprod.app.coprotec.net && bash deploy.sh preprod
 
 ```bash
 sudo install -d -o coprotec -g coprotec /srv/app.coprotec.net
-git clone git@github.com:coprotec/boutique.git /srv/app.coprotec.net
+git clone -b prod git@github.com:coprotec/boutique.git /srv/app.coprotec.net
 # .env.prod.local : vrais identifiants SmartOF / Monetico / Brevo, SMARTOF_FAKE=0, MONETICO_SIMULE=0, MONETICO_TEST=0
 sudo chown coprotec:www-data /srv/app.coprotec.net/.env.prod.local && sudo chmod 640 /srv/app.coprotec.net/.env.prod.local
 cd /srv/app.coprotec.net && bash deploy.sh prod        # écoute sur 127.0.0.1:8096

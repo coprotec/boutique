@@ -2,7 +2,8 @@
 # deploy.sh — Mise à jour de la boutique (build, migrations, cache, catalogue). Modèle : /coplanif.
 #
 # Usage : bash deploy.sh <preprod|prod>
-# À lancer depuis la racine du checkout : /srv/preprod.app.coprotec.net ou /srv/<domaine prod>.
+# À lancer depuis la racine du checkout : /srv/preprod.app.coprotec.net (branche preprod)
+# ou /srv/app.coprotec.net (branche prod).
 # Sans interaction (appelable par GitHub Actions via SSH), code de sortie non nul en cas d'échec.
 set -euo pipefail
 
@@ -18,8 +19,16 @@ log() { echo "[$(date '+%H:%M:%S')] $*"; }
 
 [ -f "$ENV_FILE" ] || { echo "[ERREUR] $ENV_FILE manquant (secrets, cf. docker-compose.$ENV_NAME.yml)" >&2; exit 1; }
 
-log "Mise à jour du code"
-git pull --ff-only
+# Une branche par environnement : le dossier de préprod suit « preprod », celui de prod suit « prod ».
+BRANCHE="$(git rev-parse --abbrev-ref HEAD)"
+if [ "$BRANCHE" != "$ENV_NAME" ]; then
+    echo "[ERREUR] Ce dossier est sur la branche « $BRANCHE », pas « $ENV_NAME »." >&2
+    echo "         Corriger : git fetch origin && git switch $ENV_NAME" >&2
+    exit 1
+fi
+
+log "Mise à jour du code (branche $ENV_NAME)"
+git pull --ff-only origin "$ENV_NAME"
 
 log "Construction des images"
 $COMPOSE build --pull

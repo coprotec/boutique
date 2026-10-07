@@ -38,12 +38,14 @@ if ! github_ok; then
 fi
 
 echo
-echo "== 2. Code"
+echo "== 2. Code (branche preprod)"
 if [ -d "$DOSSIER/.git" ]; then
-    git -C "$DOSSIER" pull --ff-only
+    git -C "$DOSSIER" fetch origin
+    git -C "$DOSSIER" switch preprod 2>/dev/null || git -C "$DOSSIER" switch -c preprod --track origin/preprod
+    git -C "$DOSSIER" pull --ff-only origin preprod
 else
     sudo install -d -o coprotec -g coprotec "$DOSSIER"
-    git clone "$DEPOT" "$DOSSIER"
+    git clone -b preprod "$DEPOT" "$DOSSIER"
 fi
 git -C "$DOSSIER" log -1 --format='Version : %h %ci %s'
 

@@ -60,5 +60,6 @@ Hosted on `boutique-old`'s current VPS (Ubuntu 22.04, 2 GB RAM, SSH on port 2268
 - DB: `php bin/console doctrine:migrations:migrate` (MySQL). Tests run on SQLite (`.env.test`): `php bin/phpunit`.
 - Catalogue: `php bin/console app:catalog:sync`. Cron (see `docker/cron/crontab`): `app:orders:expire` every minute, `app:smartof:send [numero]` every 5 min (also for manual retry after an alert).
 - Without credentials: `SMARTOF_FAKE=1` serves SmartOF from `fixtures/smartof/$SMARTOF_FAKE_FIXTURES` (`demo_api.json` demo catalogue for dev/préprod, `fake_api.json` pinned for tests; writes kept in `var/smartof-fake/<env>.json`); `MONETICO_SIMULE=1` (set in `.env.dev`) replaces the Monetico page with a local simulator that posts a signed notification.
-- Préprod / prod: `bash deploy.sh <preprod|prod>` on the VPS; secrets in `.env.<env>.local`, mounted as `.env.local`; host Apache vhost in `docker/apache-hote/`.
+- Branches: `main` = development (CI tests only); pushing to `preprod` / `prod` deploys that environment via GitHub Actions (prod needs approval). Promote with fast-forward merges `main → preprod → prod`.
+- Préprod / prod: `bash deploy.sh <preprod|prod>` on the VPS (refuses to run unless the checkout is on the matching branch); secrets in `.env.<env>.local`, mounted as `.env.local`; host Apache vhost in `docker/apache-hote/`.
 - Every business assumption awaiting an answer is marked `PROVISOIRE (QE-n / QSO-n)` in code and `.env` — grep for it when answers come back in `QUESTIONS_EQUIPES.md`.

@@ -1,19 +1,18 @@
-# Tests à chaque push ; déploiement préprod automatique sur main ; prod uniquement à la main (workflow_dispatch).
+# Une branche par environnement :
+#   main     → tests uniquement (développement)
+#   preprod  → tests puis déploiement de la préprod (/srv/preprod.app.coprotec.net)
+#   prod     → tests puis déploiement de la prod (/srv/app.coprotec.net), après validation (environnement « prod »
+#              avec Required reviewers sur GitHub)
+# Relance manuelle : Actions → CI / déploiement → Run workflow, en choisissant la branche preprod ou prod.
 # Secrets GitHub : REMOTE_HOST, REMOTE_PORT (2268), REMOTE_USER (coprotec), REMOTE_KNOWN_HOSTS, SSH_PRIVATE_KEY.
 # Fournis par docker/vps/11-github-actions.sh (DEPLOIEMENT_VPS.md, étape 11).
 name: CI / déploiement
 
 on:
   push:
-    branches: [main]
+    branches: [main, preprod, prod]
   pull_request:
   workflow_dispatch:
-    inputs:
-      environnement:
-        description: Environnement à déployer
-        type: choice
-        options: [preprod, prod]
-        default: preprod
 
 jobs:
   tests:
@@ -34,15 +33,19 @@ jobs:
 
   deploy:
     needs: tests
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    if: github.event_name != 'pull_request' && (github.ref_name == 'preprod' || github.ref_name == 'prod')
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environnement || 'preprod' }}
+    environment: ${{ github.ref_name }}
+    # Jamais deux déploiements simultanés du même environnement.
+    concurrency:
+      group: deploy-${{ github.ref_name }}
+      cancel-in-progress: false
     steps:
       # La clé ne peut lancer qu'une commande (« deploy preprod » ou « deploy prod ») : commande forcée
       # ~coprotec/bin/deploy-gha.sh sur le serveur (docker/vps/deploy-gha.sh, installée par 11-github-actions.sh).
-      - name: Déploiement ${{ github.event.inputs.environnement || 'preprod' }}
+      - name: Déploiement ${{ github.ref_name }}
         env:
-          ENV_NAME: ${{ github.event.inputs.environnement || 'preprod' }}
+          ENV_NAME: ${{ github.ref_name }}
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           REMOTE_KNOWN_HOSTS: ${{ secrets.REMOTE_KNOWN_HOSTS }}
         run: |
