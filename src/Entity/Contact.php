@@ -17,6 +17,7 @@ class Contact
     #[ORM\Column(length: 180)]
     public string $email = '';
 
+    /** Format international E.164 (+33369288900). */
     #[ORM\Column(length: 30)]
     public string $telephone = '';
 }

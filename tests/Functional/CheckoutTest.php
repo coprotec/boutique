@@ -51,6 +51,27 @@ final class CheckoutTest extends WebTestCase
         self::assertContains('societe.siret', $chemins);
     }
 
+    public function testSocieteSuisseSansSiretNiOpco(): void
+    {
+        $csrf = $this->ouvrirFormulaire(2);
+        $payload = $this->payload();
+        $payload['societe'] = ['pays' => 'CH', 'codePostal' => '1201', 'ville' => 'Genève', 'siret' => '', 'ape' => '', 'opco' => '', 'tvaIntracom' => 'CHE-123.456.789 TVA', 'telephone' => '+41 76 333 01 11'] + $payload['societe'];
+        $payload['contact']['telephone'] = '+41 76 333 01 11';
+
+        $this->send(2, $payload, $csrf);
+        self::assertResponseIsSuccessful();
+
+        // Les mêmes valeurs sont refusées pour une société française, comme un numéro étranger sans indicatif.
+        $payload['societe']['pays'] = 'FR';
+        $payload['contact']['telephone'] = '76 333 01 11';
+        $this->send(2, $payload, $csrf);
+        self::assertResponseStatusCodeSame(422);
+        $chemins = array_column(json_decode($this->client->getResponse()->getContent(), true)['violations'], 'propertyPath');
+        foreach (['societe.codePostal', 'societe.siret', 'societe.ape', 'societe.opco', 'societe.tvaIntracom', 'contact.telephone'] as $chemin) {
+            self::assertContains($chemin, $chemins);
+        }
+    }
+
     public function testParcoursCompletPaiementCbSimule(): void
     {
         $csrf = $this->ouvrirFormulaire(2);

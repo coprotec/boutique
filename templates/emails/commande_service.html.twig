@@ -3,7 +3,7 @@
 {% block contenu %}
     <p>Nouvelle réservation sur la boutique : <strong>{{ commande.numero }}</strong>.</p>
     {{ include('emails/_commande.html.twig') }}
-    <p>Contact : {{ commande.contact.prenom }} {{ commande.contact.nom }} — {{ commande.contact.email }} — {{ commande.contact.telephone }}</p>
+    <p>Contact : {{ commande.contact.prenom }} {{ commande.contact.nom }} — {{ commande.contact.email }} — {{ commande.contact.telephone|phone }}</p>
     {% if commande.identifiantFranceTravail %}<p>Identifiant France Travail : {{ commande.identifiantFranceTravail }}</p>{% endif %}
     {% if commande.remarque %}<p>Remarque du client : {{ commande.remarque }}</p>{% endif %}
     <p style="color:#5b6776;font-size:13px;">L'inscription est transmise automatiquement à SmartOF (commanditaire « {{ commande.numero }} »).</p>

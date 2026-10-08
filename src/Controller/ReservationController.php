@@ -14,6 +14,7 @@ use App\Reservation\ParticipantInput;
 use App\Reservation\InsufficientSeatsException;
 use App\Reservation\ReservationService;
 use App\Reservation\CompanyInput;
+use App\Reservation\Formats;
 use App\Smartof\EnrollmentSender;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -21,6 +22,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Intl\Countries;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
@@ -59,6 +61,7 @@ final class ReservationController extends AbstractController
                 'maxParticipants' => ReservationRequest::MAX_PARTICIPANTS,
                 'eligibleCpf' => $formation->isEligibleCpf(),
                 'organisations' => CompanyInput::ORGANISATIONS,
+                'pays' => $this->countries(),
                 'situations' => ParticipantInput::SITUATIONS,
                 'financements' => array_map(static fn (Funding $f): array => ['valeur' => $f->value, 'libelle' => $f->label()], Funding::cases()),
                 'saisie' => $request->getSession()->get(self::CLE_SESSION.$id),
@@ -165,6 +168,14 @@ final class ReservationController extends AbstractController
         $transmetteur->send($commande);
 
         return $this->redirectToRoute('commande', ['jeton' => $commande->getJeton()]);
+    }
+
+    /** @return list<array{valeur: string, libelle: string}> France en tête, puis ordre alphabétique français */
+    private function countries(): array
+    {
+        $pays = [Formats::PAYS_DEFAUT => Countries::getName(Formats::PAYS_DEFAUT, 'fr')] + Countries::getNames('fr');
+
+        return array_map(static fn (string $code, string $nom): array => ['valeur' => $code, 'libelle' => $nom], array_keys($pays), $pays);
     }
 
     private function findSession(int $id): Session

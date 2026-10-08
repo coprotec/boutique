@@ -37,13 +37,51 @@ final class FormatsTest extends TestCase
         self::assertFalse(Formats::isValidSiret('35600000000002'));
     }
 
-    public function testTelephone(): void
+    /** @return iterable<string, array{string, ?string}> */
+    public static function telephones(): iterable
     {
-        foreach (['03 69 28 89 00', '0369288900', '+33 3 69 28 89 00', '06.12.34.56.78'] as $ok) {
-            self::assertMatchesRegularExpression(Formats::TELEPHONE, $ok);
-        }
-        foreach (['12345', '00 69 28 89 00', '+44 20 1234 5678'] as $ko) {
-            self::assertDoesNotMatchRegularExpression(Formats::TELEPHONE, $ko);
-        }
+        yield 'national' => ['03 69 28 89 00', '+33369288900'];
+        yield 'points' => ['06.12.34.56.78', '+33612345678'];
+        yield '+33' => ['+33 3 69 28 89 00', '+33369288900'];
+        yield '+33 (0)' => ['+33 (0)6 12 34 56 78', '+33612345678'];
+        yield '+33 0' => ['+33 06 12 34 56 78', '+33612345678'];
+        yield 'Suisse' => ['+41 76 333 01 11', '+41763330111'];
+        yield 'Suisse en 00' => ['0041 76 333 01 11', '+41763330111'];
+        yield 'Royaume-Uni' => ['+44 20 1234 5678', '+442012345678'];
+        yield 'trop court' => ['12345', null];
+        yield 'national à 9 chiffres' => ['03 69 28 89 0', null];
+        yield 'indicatif commençant par 0' => ['+0 69 28 89 00', null];
+        yield 'étranger sans indicatif' => ['76 333 01 11', null];
+        yield '+33 trop long' => ['+33 3 69 28 89 00 1', null];
+        yield 'lettres' => ['03 69 AB 89 00', null];
+    }
+
+    #[DataProvider('telephones')]
+    public function testNormalisationTelephone(string $saisie, ?string $attendu): void
+    {
+        self::assertSame($attendu, Formats::normalizePhone($saisie));
+    }
+
+    public function testDecoupageEtAffichageTelephone(): void
+    {
+        self::assertSame(['33', '369288900'], Formats::splitPhone('+33369288900'));
+        self::assertSame(['41', '763330111'], Formats::splitPhone('+41763330111'));
+        self::assertSame(['1', '4155550123'], Formats::splitPhone('+14155550123'));
+        self::assertSame(['352', '621123456'], Formats::splitPhone('+352621123456'));
+        self::assertSame(['33', '369288900'], Formats::splitPhone('03 69 28 89 00')); // saisie d'avant E.164
+        self::assertSame('03 69 28 89 00', Formats::formatPhone('+33369288900'));
+        self::assertSame('+41 763330111', Formats::formatPhone('+41763330111'));
+    }
+
+    public function testCodePostalSelonLePays(): void
+    {
+        self::assertNull(Formats::postalCodeError('68000', 'FR'));
+        self::assertNull(Formats::postalCodeError('97400', 'FR'));
+        self::assertSame('Code postal invalide : 5 chiffres.', Formats::postalCodeError('1201', 'FR'));
+        self::assertNull(Formats::postalCodeError('1201', 'CH'));
+        self::assertSame('Code postal invalide : 4 chiffres.', Formats::postalCodeError('68000', 'CH'));
+        self::assertNull(Formats::postalCodeError('98000', 'MC'));
+        self::assertNull(Formats::postalCodeError('SW1A 1AA', 'GB'));
+        self::assertSame('Code postal invalide.', Formats::postalCodeError('#', 'GB'));
     }
 }

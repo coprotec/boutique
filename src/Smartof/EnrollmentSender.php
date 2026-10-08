@@ -6,6 +6,8 @@ use App\Entity\Order;
 use App\Entity\Participant;
 use App\Notification\Notifier;
 use App\Reservation\Encryptor;
+use App\Reservation\Formats;
+use Symfony\Component\Intl\Countries;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -109,11 +111,17 @@ class EnrollmentSender
     private function company(Order $commande): string
     {
         $societe = $commande->getSociete();
-        foreach ($this->smartof->paginate('v2/entreprises', ['meta.siret' => ['eq' => $societe->siret]]) as $entreprise) {
-            return $entreprise['entrepriseUid'];
+        // Société étrangère, sans SIRET : PROVISOIRE (QSO-20), créée à chaque fois faute de clé de dédoublonnage
+        // (une recherche sur un SIRET vide renverrait n'importe quelle entreprise sans SIRET).
+        if ('' !== $societe->siret) {
+            foreach ($this->smartof->paginate('v2/entreprises', ['meta.siret' => ['eq' => $societe->siret]]) as $entreprise) {
+                return $entreprise['entrepriseUid'];
+            }
         }
 
-        $adresse = ['rue' => $societe->adresse, 'complementAdresse' => '', 'codePostal' => $societe->codePostal, 'ville' => $societe->ville];
+        // PROVISOIRE (QSO-20) : l'adresse SmartOF n'a pas de champ pays connu, on l'ajoute à la ville hors de France.
+        $ville = Formats::PAYS_DEFAUT === $societe->pays ? $societe->ville : $societe->ville.' ('.Countries::getName($societe->pays, 'fr').')';
+        $adresse = ['rue' => $societe->adresse, 'complementAdresse' => '', 'codePostal' => $societe->codePostal, 'ville' => $ville];
         $reponse = $this->smartof->request('POST', 'v2/entreprises', ['json' => [
             'customId' => '',
             'contactClientUids' => [],
@@ -207,16 +215,10 @@ class EnrollmentSender
         return $champs;
     }
 
-    /** Format « international simple » attendu par SmartOF : +33XXXXXXXXX. */
+    /** Format « international simple » attendu par SmartOF : +33XXXXXXXXX (déjà le format stocké, E.164). */
     private function phone(string $telephone): string
     {
-        $chiffres = preg_replace('/\D/', '', $telephone) ?? '';
-
-        return match (true) {
-            '' === $chiffres => '',
-            str_starts_with($chiffres, '33') => '+'.$chiffres,
-            default => '+33'.substr($chiffres, 1),
-        };
+        return '' === $telephone ? '' : implode('', ['+', ...Formats::splitPhone($telephone)]);
     }
 
     private function fail(Order $commande, string $erreur, bool $temporaire, \DateTimeImmutable $maintenant, bool $surreservation): void

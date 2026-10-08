@@ -20,8 +20,8 @@
                     {% endfor %}
                 </ul>
                 <dl class="grille-recap">
-                    <div><dt>Entreprise</dt><dd>{{ demande.societe.raisonSociale }}<br><small>{{ demande.societe.adresse }}, {{ demande.societe.codePostal }} {{ demande.societe.ville }} · SIRET {{ demande.societe.normalizedSiret }}</small></dd></div>
-                    <div><dt>Contact</dt><dd>{{ demande.contact.prenom }} {{ demande.contact.nom }}<br><small>{{ demande.contact.email }} · {{ demande.contact.telephone }}</small></dd></div>
+                    <div><dt>Entreprise</dt><dd>{{ demande.societe.raisonSociale }}<br><small>{{ demande.societe.adresse }}, {{ demande.societe.normalizedPostalCode }} {{ demande.societe.ville }}{% if not demande.societe.french %}, {{ demande.societe.pays|country_name }}{% endif %}{% if demande.societe.normalizedSiret %} · SIRET {{ demande.societe.normalizedSiret }}{% endif %}</small></dd></div>
+                    <div><dt>Contact</dt><dd>{{ demande.contact.prenom }} {{ demande.contact.nom }}<br><small>{{ demande.contact.email }} · {{ demande.contact.telephone|phone }}</small></dd></div>
                     <div><dt>Financement</dt><dd>{{ demande.financement.label }}{% if demande.normalizedFranceTravailId %} · identifiant {{ demande.normalizedFranceTravailId }}{% endif %}</dd></div>
                 </dl>
             </section>

@@ -1,6 +1,7 @@
 <script setup>
 import { computed, reactive, ref, watch } from 'vue';
 import Champ from '../tool/FormType/Champ.vue';
+import AdresseFrance from '../tool/FormType/AdresseFrance.vue';
 
 const props = defineProps({ config: { type: Object, required: true } });
 const c = props.config;
@@ -12,7 +13,7 @@ const form = reactive({
     participants: saisie.participants ?? Array.from({ length: Math.min(c.nbInitial, c.maxParticipants) }, participantVide),
     contact: { prenom: '', nom: '', email: '', emailConfirmation: '', telephone: '', ...(saisie.contact ?? {}) },
     societe: {
-        raisonSociale: '', adresse: '', codePostal: '', ville: '', siret: '', ape: '', tvaIntracom: '',
+        raisonSociale: '', pays: 'FR', adresse: '', codePostal: '', ville: '', siret: '', ape: '', tvaIntracom: '',
         nbSalaries: null, opco: '', organisationProfessionnelle: '', dirigeantPrenom: '', dirigeantNom: '',
         telephone: '', email: '', ...(saisie.societe ?? {}),
     },
@@ -47,6 +48,13 @@ watch(() => [form.contact.prenom, form.contact.nom], ([prenom, nom], [ancienPren
 });
 
 const erreur = (chemin) => erreurs.value[chemin];
+
+// France : suggestions d'adresse, SIRET / APE / OPCO obligatoires. Ailleurs : saisie libre, champs français masqués.
+const enFrance = computed(() => form.societe.pays === 'FR');
+const aideTelephone = 'Hors de France, commencez par l\'indicatif du pays : +41 76 333 01 11.';
+function adresseChoisie({ adresse, codePostal, ville }) {
+    Object.assign(form.societe, { adresse, codePostal, ville });
+}
 
 async function envoyer() {
     erreurs.value = {};
@@ -125,18 +133,24 @@ async function envoyer() {
                 </header>
                 <div class="row g-3">
                     <Champ class="col-md-8" label="Raison sociale" v-model="form.societe.raisonSociale" :erreur="erreur('societe.raisonSociale')" autocomplete="organization" />
-                    <Champ class="col-md-4" label="SIRET" v-model="form.societe.siret" :erreur="erreur('societe.siret')" inputmode="numeric" maxlength="17" placeholder="14 chiffres" />
-                    <Champ class="col-12" label="Adresse" v-model="form.societe.adresse" :erreur="erreur('societe.adresse')" autocomplete="street-address" />
-                    <Champ class="col-md-4" label="Code postal" v-model="form.societe.codePostal" :erreur="erreur('societe.codePostal')" inputmode="numeric" maxlength="5" autocomplete="postal-code" />
+                    <Champ class="col-md-4" label="Pays" type="select" :options="c.pays" v-model="form.societe.pays" :erreur="erreur('societe.pays')" autocomplete="country" />
+                    <AdresseFrance v-if="enFrance" class="col-12" label="Adresse" v-model="form.societe.adresse" :erreur="erreur('societe.adresse')" @choisir="adresseChoisie" />
+                    <Champ v-else class="col-12" label="Adresse" v-model="form.societe.adresse" :erreur="erreur('societe.adresse')" autocomplete="street-address" />
+                    <Champ class="col-md-4" label="Code postal" v-model="form.societe.codePostal" :erreur="erreur('societe.codePostal')" autocomplete="postal-code"
+                           :inputmode="enFrance ? 'numeric' : 'text'" :maxlength="enFrance ? 5 : 10" />
                     <Champ class="col-md-8" label="Ville" v-model="form.societe.ville" :erreur="erreur('societe.ville')" autocomplete="address-level2" />
-                    <Champ class="col-md-4" label="Code APE" v-model="form.societe.ape" :erreur="erreur('societe.ape')" maxlength="6" placeholder="4322B" />
-                    <Champ class="col-md-4" label="TVA intracommunautaire" facultatif v-model="form.societe.tvaIntracom" :erreur="erreur('societe.tvaIntracom')" placeholder="FR…" />
+                    <template v-if="enFrance">
+                        <Champ class="col-md-4" label="SIRET" v-model="form.societe.siret" :erreur="erreur('societe.siret')" inputmode="numeric" maxlength="17" placeholder="14 chiffres" />
+                        <Champ class="col-md-4" label="Code APE" v-model="form.societe.ape" :erreur="erreur('societe.ape')" maxlength="6" placeholder="4322B" />
+                    </template>
+                    <Champ class="col-md-4" :label="enFrance ? 'TVA intracommunautaire' : 'N° de TVA'" facultatif v-model="form.societe.tvaIntracom" :erreur="erreur('societe.tvaIntracom')"
+                           :placeholder="enFrance ? 'FR…' : 'CHE123456789, DE123456789…'" />
                     <Champ class="col-md-4" label="Nombre de salariés" type="number" v-model.number="form.societe.nbSalaries" :erreur="erreur('societe.nbSalaries')" min="0" />
-                    <Champ class="col-md-6" label="OPCO" v-model="form.societe.opco" :erreur="erreur('societe.opco')" placeholder="Constructys, AKTO…" />
+                    <Champ v-if="enFrance" class="col-md-6" label="OPCO" v-model="form.societe.opco" :erreur="erreur('societe.opco')" placeholder="Constructys, AKTO…" />
                     <Champ class="col-md-6" label="Organisation professionnelle" type="select" :options="c.organisations" v-model="form.societe.organisationProfessionnelle" :erreur="erreur('societe.organisationProfessionnelle')" />
                     <Champ class="col-md-6" label="Prénom du dirigeant" v-model="form.societe.dirigeantPrenom" :erreur="erreur('societe.dirigeantPrenom')" />
                     <Champ class="col-md-6" label="Nom du dirigeant" v-model="form.societe.dirigeantNom" :erreur="erreur('societe.dirigeantNom')" />
-                    <Champ class="col-md-6" label="Téléphone de la société" type="tel" v-model="form.societe.telephone" :erreur="erreur('societe.telephone')" />
+                    <Champ class="col-md-6" label="Téléphone de la société" type="tel" v-model="form.societe.telephone" :erreur="erreur('societe.telephone')" :aide="aideTelephone" placeholder="03 69 28 89 00" />
                     <Champ class="col-md-6" label="Email de la société" type="email" v-model="form.societe.email" :erreur="erreur('societe.email')" />
                 </div>
             </section>
@@ -152,7 +166,7 @@ async function envoyer() {
                     <Champ class="col-md-6" label="Nom" v-model="form.contact.nom" :erreur="erreur('contact.nom')" autocomplete="family-name" />
                     <Champ class="col-md-6" label="Email" type="email" v-model="form.contact.email" :erreur="erreur('contact.email')" autocomplete="email" />
                     <Champ class="col-md-6" label="Confirmation de l'email" type="email" v-model="form.contact.emailConfirmation" :erreur="erreur('contact.emailConfirmation')" autocomplete="off" @paste.prevent />
-                    <Champ class="col-md-6" label="Téléphone" type="tel" v-model="form.contact.telephone" :erreur="erreur('contact.telephone')" autocomplete="tel" />
+                    <Champ class="col-md-6" label="Téléphone" type="tel" v-model="form.contact.telephone" :erreur="erreur('contact.telephone')" :aide="aideTelephone" autocomplete="tel" placeholder="06 12 34 56 78" />
                 </div>
             </section>
 

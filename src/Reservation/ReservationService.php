@@ -71,23 +71,24 @@ class ReservationService
         $contact->prenom = trim($demande->contact->prenom);
         $contact->nom = trim($demande->contact->nom);
         $contact->email = mb_strtolower(trim($demande->contact->email));
-        $contact->telephone = trim($demande->contact->telephone);
+        $contact->telephone = Formats::normalizePhone($demande->contact->telephone) ?? trim($demande->contact->telephone);
 
         $saisie = $demande->societe;
         $societe = $commande->getSociete();
         $societe->raisonSociale = trim($saisie->raisonSociale);
         $societe->adresse = trim($saisie->adresse);
-        $societe->codePostal = $saisie->codePostal;
+        $societe->codePostal = $saisie->normalizedPostalCode();
         $societe->ville = trim($saisie->ville);
+        $societe->pays = $saisie->pays;
         $societe->siret = $saisie->normalizedSiret();
         $societe->ape = $saisie->normalizedApe();
-        $societe->tvaIntracom = strtoupper(trim($saisie->tvaIntracom));
+        $societe->tvaIntracom = $saisie->normalizedVatNumber();
         $societe->nbSalaries = (int) $saisie->nbSalaries;
-        $societe->opco = trim($saisie->opco);
+        $societe->opco = $saisie->normalizedOpco();
         $societe->organisationProfessionnelle = $saisie->organisationProfessionnelle;
         $societe->dirigeantPrenom = trim($saisie->dirigeantPrenom);
         $societe->dirigeantNom = trim($saisie->dirigeantNom);
-        $societe->telephone = trim($saisie->telephone);
+        $societe->telephone = Formats::normalizePhone($saisie->telephone) ?? trim($saisie->telephone);
         $societe->email = mb_strtolower(trim($saisie->email));
 
         $commande->setIdentifiantFranceTravail($demande->normalizedFranceTravailId());

@@ -5,7 +5,7 @@
     <tr><td style="color:#5b6776;">Dates</td><td>{% if session.multiDay %}Du {{ session.dateDebut|date_fr('d MMMM') }} au {{ session.dateFin|date_fr('d MMMM y') }}{% else %}{{ session.dateDebut|date_fr('EEEE d MMMM y') }}{% endif %}</td></tr>
     {% if session.lieu %}<tr><td style="color:#5b6776;">Lieu</td><td>{{ session.lieu }}</td></tr>{% endif %}
     <tr><td style="color:#5b6776;">Participants</td><td>{% for p in commande.participants %}{{ p.prenom }} {{ p.nom }}{{ not loop.last ? ', ' }}{% endfor %}</td></tr>
-    <tr><td style="color:#5b6776;">Entreprise</td><td>{{ commande.societe.raisonSociale }} (SIRET {{ commande.societe.siret }})</td></tr>
+    <tr><td style="color:#5b6776;">Entreprise</td><td>{{ commande.societe.raisonSociale }}{% if commande.societe.siret %} (SIRET {{ commande.societe.siret }}){% else %} ({{ commande.societe.pays|country_name }}){% endif %}</td></tr>
     <tr><td style="color:#5b6776;">Financement</td><td>{{ commande.financement.label }}</td></tr>
     <tr><td style="color:#5b6776;">Paiement</td><td>{{ commande.modePaiement.label }}</td></tr>
     <tr><td style="color:#5b6776;">Total</td><td><strong>{{ commande.totalTtcCentimes|price }} TTC</strong> ({{ commande.totalHtCentimes|price }} HT)</td></tr>

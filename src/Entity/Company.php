@@ -14,12 +14,18 @@ class Company
     #[ORM\Column(length: 255)]
     public string $adresse = '';
 
-    #[ORM\Column(length: 5)]
+    /** 10 caractères : codes postaux étrangers (Royaume-Uni « SW1A 1AA », Pays-Bas « 1234 AB »…). */
+    #[ORM\Column(length: 10)]
     public string $codePostal = '';
 
     #[ORM\Column(length: 120)]
     public string $ville = '';
 
+    /** Code pays ISO 3166-1 alpha-2. */
+    #[ORM\Column(length: 2, options: ['fixed' => true, 'default' => 'FR'])]
+    public string $pays = 'FR';
+
+    /** Vide pour une société étrangère, comme l'APE et l'OPCO (QE-38). */
     #[ORM\Column(length: 14)]
     public string $siret = '';
 
@@ -44,6 +50,7 @@ class Company
     #[ORM\Column(length: 100)]
     public string $dirigeantNom = '';
 
+    /** Format international E.164 (+33369288900). */
     #[ORM\Column(length: 30)]
     public string $telephone = '';
 

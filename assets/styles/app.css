@@ -201,6 +201,9 @@ h1, h2, h3, .h1, .h2, .h3, .h4, .h5, .h6 { font-family: var(--police-titre); fon
 @media (max-width: 991.98px) { .tunnel { grid-template-columns: 1fr; } }
 .tunnel__principal { display: grid; gap: 1.25rem; }
 .tunnel__resume { position: sticky; top: 1rem; }
+/* Suggestions d'adresse (AdresseFrance.vue) */
+.adresse-fr { position: relative; }
+.adresse-fr__liste { position: absolute; z-index: 10; left: calc(var(--bs-gutter-x) * .5); right: calc(var(--bs-gutter-x) * .5); max-height: 16rem; overflow-y: auto; box-shadow: var(--bs-box-shadow); cursor: pointer; }
 
 .etape { background: var(--c-surface); border: 1px solid var(--c-trait); border-radius: var(--rayon); padding: 1.5rem; }
 .etape__entete { margin-bottom: 1.1rem; }

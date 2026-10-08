@@ -3,6 +3,7 @@
 namespace App\Payment;
 
 use App\Entity\Order;
+use App\Reservation\Formats;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
@@ -47,7 +48,7 @@ class Monetico
             'addressLine1' => $societe->adresse,
             'city' => $societe->ville,
             'postalCode' => $societe->codePostal,
-            'country' => 'FR',
+            'country' => $societe->pays,
         ];
         // Contexte de commande exigé par Monetico v3 (3-D Secure 2), même contenu que boutique-old.
         $contexte = [
@@ -102,13 +103,11 @@ class Monetico
         return strtoupper(hash_hmac('sha1', $chaine, (string) hex2bin($this->cleHex)));
     }
 
+    /** Format Monetico : indicatif-numéro national, ex. +33-369288900, +41-763330111. */
     private function internationalPhone(string $telephone): string
     {
-        $chiffres = preg_replace('/\D/', '', $telephone) ?? '';
-        if (str_starts_with($chiffres, '33')) {
-            $chiffres = '0'.substr($chiffres, 2);
-        }
+        [$indicatif, $national] = Formats::splitPhone($telephone);
 
-        return '+33-'.substr($chiffres, 1);
+        return "+$indicatif-$national";
     }
 }

@@ -2,10 +2,12 @@
 
 namespace App\Twig;
 
+use App\Reservation\Formats;
+use Symfony\Component\Intl\Countries;
 use Twig\Attribute\AsTwigFilter;
 
 /**
- * Formats français (prix, dates) sans dépendre de twig/intl-extra.
+ * Formats français (prix, dates, téléphones, pays) sans dépendre de twig/intl-extra.
  */
 final class AppExtension
 {
@@ -47,5 +49,19 @@ final class AppExtension
         $formatter = new \IntlDateFormatter('fr_FR', \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, 'Europe/Paris', null, $motif);
 
         return (string) $formatter->format($date);
+    }
+
+    /** +33369288900 → « 03 69 28 89 00 » ; +41763330111 → « +41 763330111 ». */
+    #[AsTwigFilter('phone')]
+    public function phone(string $telephone): string
+    {
+        return '' === $telephone ? '' : Formats::formatPhone($telephone);
+    }
+
+    /** CH → « Suisse ». */
+    #[AsTwigFilter('country_name')]
+    public function countryName(string $code): string
+    {
+        return Countries::exists($code) ? Countries::getName($code, 'fr') : $code;
     }
 }

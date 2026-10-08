@@ -3,6 +3,7 @@
 namespace App\Reservation;
 
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 final class ContactInput
 {
@@ -24,6 +25,13 @@ final class ContactInput
     public string $emailConfirmation = '';
 
     #[Assert\NotBlank(message: 'Le téléphone est obligatoire.')]
-    #[Assert\Regex(pattern: Formats::TELEPHONE, message: 'Numéro de téléphone invalide (ex. 03 69 28 89 00 ou +33 3 69 28 89 00).')]
     public string $telephone = '';
+
+    #[Assert\Callback]
+    public function validate(ExecutionContextInterface $context): void
+    {
+        if ('' !== trim($this->telephone) && null === Formats::normalizePhone($this->telephone)) {
+            $context->buildViolation(Formats::PHONE_ERROR)->atPath('telephone')->addViolation();
+        }
+    }
 }
