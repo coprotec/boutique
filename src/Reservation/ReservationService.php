@@ -54,8 +54,8 @@ class ReservationService
             if ($mode->isOnline()) {
                 $commande->setExpireLe($maintenant->modify(\sprintf('+%d minutes', $this->blocageMinutes)));
             } else {
-                // PROVISOIRE (QE-8) : virement, chèque et France Travail engagent les places tout de suite ;
-                // l'inscription part dans SmartOF avec le mode de paiement, la réception est suivie par la compta.
+                // Virement et France Travail engagent les places tout de suite (QE-8) ; l'inscription part dans SmartOF
+                // avec le mode de paiement, les assistantes formation y notent la réception du virement (délai : 10 jours).
                 $commande->validate($maintenant);
             }
 

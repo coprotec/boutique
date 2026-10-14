@@ -14,7 +14,7 @@ enum OrderStatus: string
     case Expiree = 'expiree';
     /** Paiement CB refusé par Monetico : places libérées. */
     case PaiementRefuse = 'paiement_refuse';
-    /** Payée par CB, ou engagée (virement, chèque, France Travail) : places acquises, à transmettre à SmartOF. */
+    /** Payée par CB, ou engagée (virement, France Travail) : places acquises, à transmettre à SmartOF. */
     case Validee = 'validee';
 
     public function label(): string

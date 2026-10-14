@@ -22,14 +22,14 @@ class Notifier
         private readonly UrlGeneratorInterface $urls,
         private readonly LoggerInterface $logger,
         #[Autowire('%env(BOUTIQUE_EMAIL_EXPEDITEUR)%')] private readonly string $expediteur,
-        // PROVISOIRE (QE-22) : adresse prévenue à chaque nouvelle réservation.
+        // Adresse prévenue à chaque nouvelle réservation : contact@coprotec.net (QE-22).
         #[Autowire('%env(BOUTIQUE_EMAIL_SERVICE)%')] private readonly string $emailService,
         #[Autowire('%env(BOUTIQUE_EMAIL_ALERTES)%')] private readonly string $emailAlertes,
         #[Autowire('%env(BOUTIQUE_IBAN)%')] private readonly string $iban,
     ) {
     }
 
-    /** Récapitulatif au client (avec les instructions de paiement hors CB) et copie au service formation. */
+    /** Confirmation de pré-inscription au client (RIB ou reçu CB, QE-20) et avis sans données personnelles au service (QE-22). */
     public function orderValidated(Order $commande): void
     {
         $contexte = [
@@ -40,7 +40,7 @@ class Notifier
 
         $this->send((new TemplatedEmail())
             ->to(new Address($commande->getContact()->email, $commande->getContact()->prenom.' '.$commande->getContact()->nom))
-            ->subject(\sprintf('Votre réservation %s — %s', $commande->getNumero(), $commande->getSession()->getFormation()->getIntitule()))
+            ->subject(\sprintf('Confirmation de pré-inscription %s — %s', $commande->getNumero(), $commande->getSession()->getFormation()->getIntitule()))
             ->htmlTemplate('emails/commande_client.html.twig')
             ->context($contexte), $commande);
 

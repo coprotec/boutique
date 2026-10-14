@@ -8,6 +8,7 @@
     {% endif %}
     <p>Dernière erreur :</p>
     <pre style="background:#f5f7fa;padding:12px;border-radius:8px;white-space:pre-wrap;font-size:12px;">{{ commande.derniereErreur }}</pre>
-    {{ include('emails/_commande.html.twig') }}
+    <p>Formation : {{ commande.session.formation.intitule }}, session du {{ commande.session.dateDebut|date_fr('d MMMM y') }} · {{ commande.nbParticipants }} participant(s) · {{ commande.totalTtcCentimes|price }} TTC ({{ commande.modePaiement.label }}).</p>
+    {# Minimisation RGPD : pas de données personnelles ici, le dossier est en base (commande {{ commande.numero }}). #}
     <p>Après correction, relancez l'envoi : <code>php bin/console app:smartof:send {{ commande.numero }}</code></p>
 {% endblock %}

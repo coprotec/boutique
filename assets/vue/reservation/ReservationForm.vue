@@ -114,7 +114,7 @@ async function envoyer() {
                         <Champ class="col-md-4" label="Date de naissance" type="date" v-model="p.dateNaissance" :erreur="erreur(`participants.${i}.dateNaissance`)" />
                         <Champ class="col-md-4" label="Situation" type="select" :options="c.situations" v-model="p.situation" :erreur="erreur(`participants.${i}.situation`)" />
                         <Champ class="col-md-4" label="N° de sécurité sociale" v-model="p.numeroSecu" :erreur="erreur(`participants.${i}.numeroSecu`)"
-                               placeholder="1 85 05 68 066 123 45" inputmode="text" maxlength="21" autocomplete="off" />
+                               placeholder="1 85 05 68 066 123 74" inputmode="text" maxlength="21" autocomplete="off" />
                     </div>
                 </div>
 

@@ -1,20 +1,31 @@
 {% extends 'emails/_layout.html.twig' %}
 
-{# PROVISOIRE (QE-20, QE-33) : textes repris de boutique-old, à faire valider. #}
+{# Confirmation de pré-inscription (QE-20) : RIB pour le virement, reçu pour la carte bancaire.
+   La convention de formation est envoyée ensuite par SmartOF (QE-19). PROVISOIRE (QE-33) : textes à faire valider. #}
 {% block contenu %}
     <p>Bonjour {{ commande.contact.prenom }},</p>
-    <p>Votre réservation <strong>{{ commande.numero }}</strong> est bien enregistrée.</p>
+    <p>Nous confirmons votre <strong>pré-inscription n° {{ commande.numero }}</strong>.</p>
 
     {{ include('emails/_commande.html.twig') }}
 
     {% if commande.modePaiement.value == 'cb' %}
-        <p>Votre paiement par carte bancaire a été accepté.</p>
+        {% set paiement = commande.paiementDetails %}
+        <p style="margin-bottom:4px;"><strong>Reçu de paiement par carte bancaire</strong></p>
+        <table role="presentation" width="100%" cellpadding="6" cellspacing="0" style="border-collapse:collapse;font-size:14px;margin:0 0 16px;background:#f5f7fa;border-radius:8px;">
+            <tr><td style="color:#5b6776;width:40%;">Date du paiement</td><td>{{ commande.valideeLe|date_fr('d MMMM y à HH:mm') }}</td></tr>
+            <tr><td style="color:#5b6776;">Montant HT</td><td>{{ commande.totalHtCentimes|price }}</td></tr>
+            <tr><td style="color:#5b6776;">TVA ({{ commande.tauxTva }} %)</td><td>{{ (commande.totalTtcCentimes - commande.totalHtCentimes)|price }}</td></tr>
+            <tr><td style="color:#5b6776;">Montant payé TTC</td><td><strong>{{ commande.totalTtcCentimes|price }}</strong></td></tr>
+            <tr><td style="color:#5b6776;">Référence</td><td>{{ commande.numero }}{% if paiement.numauto ?? '' %} · autorisation {{ paiement.numauto }}{% endif %}</td></tr>
+        </table>
+        <p style="color:#5b6776;font-size:13px;">Ce reçu atteste votre paiement ; la facture est établie par le service formation.</p>
     {% elseif commande.modePaiement.value == 'virement' %}
-        <p><strong>Merci d'effectuer votre virement</strong> de {{ commande.totalTtcCentimes|price }} aux coordonnées suivantes :<br>
+        <p><strong>Merci d'effectuer votre virement sous 10 jours</strong>, d'un montant de {{ commande.totalTtcCentimes|price }}, sur le compte suivant :<br>
             IBAN : {{ iban ?: 'communiqué par le service formation' }}<br>
             BIC : CMCIFRPP<br>
             Indiquez en motif la référence <strong>{{ commande.numero }}</strong>.</p>
     {% elseif commande.modePaiement.value == 'cheque' %}
+        {# Commandes antérieures au retrait du chèque (QE-21). #}
         <p><strong>Merci d'envoyer votre chèque</strong> de {{ commande.totalTtcCentimes|price }}, à l'ordre de COPROTEC, sous 10 jours, à l'adresse :<br>
             COPROTEC — 12, impasse Montgolfier — 68127 Sainte-Croix-en-Plaine<br>
             Indiquez au dos la référence <strong>{{ commande.numero }}</strong>.</p>
@@ -22,7 +33,7 @@
         <p>Afin de finaliser votre dossier, <strong>envoyez-nous l'accord de prise en charge de France Travail</strong> dès sa réception à <a href="mailto:contact@coprotec.net">contact@coprotec.net</a>.</p>
     {% endif %}
 
-    <p>Une convention de formation vous sera transmise pour finaliser l'inscription.</p>
+    <p>Une convention de formation vous sera ensuite transmise pour finaliser l'inscription.</p>
     <p><a href="{{ url }}" style="display:inline-block;background:#0071c2;color:#ffffff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:bold;">Voir ma réservation</a></p>
     <p style="color:#5b6776;font-size:13px;">Une question ? Le service formation vous répond au 03 69 28 89 00.</p>
 {% endblock %}

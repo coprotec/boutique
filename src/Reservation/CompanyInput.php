@@ -12,7 +12,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  */
 final class CompanyInput
 {
-    /** Liste de boutique-old (PROVISOIRE, QE-29). */
+    /** Liste de boutique-old, confirmée (QE-29). */
     public const ORGANISATIONS = ['Non-adhérent', 'CAPEB', 'FFB', 'SYNASAV'];
 
     #[Assert\NotBlank(message: 'La raison sociale est obligatoire.')]

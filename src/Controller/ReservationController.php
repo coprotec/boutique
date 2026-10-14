@@ -162,7 +162,7 @@ final class ReservationController extends AbstractController
             return $this->redirectToRoute('paiement_cb', ['jeton' => $commande->getJeton()]);
         }
 
-        // Virement, chèque, France Travail : commande validée d'emblée (PROVISOIRE, QE-8), inscrite dans SmartOF tout de suite ;
+        // Virement, France Travail : commande validée d'emblée (QE-8), inscrite dans SmartOF tout de suite ;
         // en cas d'échec, le cron app:smartof:send relance.
         $notificateur->orderValidated($commande);
         $transmetteur->send($commande);

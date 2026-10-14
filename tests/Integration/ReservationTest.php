@@ -78,7 +78,7 @@ final class ReservationTest extends KernelTestCase
     public function testSessionCompleteRefusee(): void
     {
         $this->expectException(InsufficientSeatsException::class);
-        self::getContainer()->get(ReservationService::class)->reserve($this->findSession(self::SESSION_COMPLETE), $this->demande(1), PaymentMethod::Cheque);
+        self::getContainer()->get(ReservationService::class)->reserve($this->findSession(self::SESSION_COMPLETE), $this->demande(1), PaymentMethod::Virement);
     }
 
     public function testLeNumeroDeSecuEstChiffreEnBase(): void
@@ -98,6 +98,9 @@ final class ReservationTest extends KernelTestCase
 
         self::assertTrue($transmetteur->send($commande));
         self::assertNotNull($commande->getSmartofCommanditaireUid());
+        foreach ($commande->getParticipants() as $participant) {
+            self::assertSame('', $participant->getNumeroSecuChiffre(), 'n° de sécu effacé une fois dans SmartOF (QE-26)');
+        }
 
         $commanditaires = $fake->created('commanditaires');
         self::assertCount(1, $commanditaires);
@@ -107,10 +110,38 @@ final class ReservationTest extends KernelTestCase
         self::assertCount(1, $fake->created('entreprises'));
 
         // Deuxième commande de la même société : l'entreprise SmartOF est retrouvée par SIRET, pas recréée.
-        $autre = self::getContainer()->get(ReservationService::class)->reserve($this->findSession('5e000000-0000-4000-8000-000000000002'), $this->demande(1), PaymentMethod::Cheque);
+        $autre = self::getContainer()->get(ReservationService::class)->reserve($this->findSession('5e000000-0000-4000-8000-000000000002'), $this->demande(1), PaymentMethod::Virement);
         $transmetteur->send($autre);
         self::assertCount(1, $fake->created('entreprises'));
         self::assertCount(2, $fake->created('commanditaires'));
+    }
+
+    public function testEmailsDeReservation(): void
+    {
+        $twig = self::getContainer()->get('twig');
+        $service = self::getContainer()->get(ReservationService::class);
+
+        $virement = $service->reserve($this->findSession(self::SESSION_8_PLACES_5_INSCRITS), $this->demande(1), PaymentMethod::Virement);
+        $contexte = ['commande' => $virement, 'url' => 'https://boutique.test/commande', 'iban' => 'FR76 TEST'];
+        $client = $twig->render('emails/commande_client.html.twig', $contexte);
+        self::assertStringContainsString('pré-inscription', $client);
+        self::assertStringContainsString('FR76 TEST', $client);
+        self::assertStringContainsString('sous 10 jours', $client);
+
+        // Minimisation RGPD : l'avis interne et l'alerte ne contiennent ni participant, ni contact, ni société.
+        $interne = $twig->render('emails/commande_service.html.twig', $contexte);
+        $alerte = $twig->render('emails/alerte_transmission.html.twig', ['commande' => $virement, 'surreservation' => true]);
+        self::assertStringContainsString($virement->getNumero(), $interne);
+        foreach (['Jean0', 'Dupont', 'Lovelace', 'ada@example.com', 'compta@acme.example', 'Acme', '73282932000074'] as $donneePersonnelle) {
+            self::assertStringNotContainsString($donneePersonnelle, $interne);
+            self::assertStringNotContainsString($donneePersonnelle, $alerte);
+        }
+
+        $cb = $service->reserve($this->findSession(self::SESSION_8_PLACES_5_INSCRITS), $this->demande(1), PaymentMethod::Cb);
+        $cb->validate(new \DateTimeImmutable(), ['numauto' => '123456']);
+        $recu = $twig->render('emails/commande_client.html.twig', ['commande' => $cb] + $contexte);
+        self::assertStringContainsString('Reçu de paiement', $recu);
+        self::assertStringContainsString('autorisation 123456', $recu);
     }
 
     public function testRefusDefinitifDeSmartofArreteLesRelances(): void

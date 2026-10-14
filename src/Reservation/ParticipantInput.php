@@ -7,7 +7,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 final class ParticipantInput
 {
-    /** Liste de boutique-old (PROVISOIRE, QE-29). */
+    /** Liste de boutique-old, confirmée (QE-29). */
     public const SITUATIONS = ['Salarié', 'Gérant non salarié', 'Demandeur d\'emploi'];
 
     #[Assert\NotBlank(message: 'Le prénom est obligatoire.')]
@@ -35,8 +35,10 @@ final class ParticipantInput
     {
         $numero = $this->normalizedSocialSecurityNumber();
         if ('' !== $numero && !Formats::isValidSocialSecurityNumber($numero)) {
-            $context->buildViolation('N° de sécurité sociale invalide : 15 caractères (13 + clé), vérifiez la saisie.')
-                ->atPath('numeroSecu')->addViolation();
+            $message = 1 === preg_match('/^[12]\d{4}(?:\d{2}|2A|2B)\d{8}$/', $numero)
+                ? 'N° de sécurité sociale invalide : la clé (2 derniers chiffres) ne correspond pas, vérifiez la saisie.'
+                : \sprintf('N° de sécurité sociale invalide : 15 caractères attendus, 13 + clé (%d saisis).', \strlen($numero));
+            $context->buildViolation($message)->atPath('numeroSecu')->addViolation();
         }
 
         $naissance = \DateTimeImmutable::createFromFormat('!Y-m-d', $this->dateNaissance);

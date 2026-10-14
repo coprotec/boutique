@@ -51,44 +51,46 @@ L'objectif est de repartir sur une base **technique volontairement plus simple**
 flowchart LR
   S[SmartOF] -->|synchro quotidienne<br/>+ à la demande| C[Catalogue boutique<br/>formations COPROTEC]
   C --> R[Réservation<br/>N participants]
-  R --> P[Paiement<br/>CB / virement / chèque / financement]
+  R --> P[Paiement<br/>CB / virement / financement]
   P -->|inscription directe| S
 ```
 
-La boutique est une **vitrine + tunnel de paiement**. Une réservation payée devient directement une inscription dans SmartOF, **sans étape de validation** par le service formation (à confirmer : QE-1). La facturation est entièrement gérée par SmartOF : la boutique ne crée ni facture ni avoir.
+La boutique est une **vitrine + tunnel de paiement**. Une réservation payée devient directement une inscription dans SmartOF, **sans étape de validation** par le service formation (décidé : QE-1). La facturation est entièrement gérée par SmartOF : la boutique ne crée ni facture ni avoir.
 
 ### 5.2 Catalogue
 
 - **Source :** copie locale des formations (produits) et sessions SmartOF, synchronisée **chaque jour tôt le matin**, plus un **déclenchement à la demande** : commande console relançable à tout moment, et notification envoyée par SmartOF si l'éditeur le permet (QSO-2).
-- **Formations COPROTEC uniquement.** SmartOF regroupe aussi les formations d'autres organismes, qui ne doivent être ni affichées ni réservables. Le moyen de les distinguer reste à arrêter (QE-4, QSO-3). Options, par ordre de préférence :
+- **Formations COPROTEC uniquement.** SmartOF regroupe aussi les formations d'autres organismes, qui ne doivent être ni affichées ni réservables. Le moyen de les distinguer reste à arrêter (QSO-3). Options, par ordre de préférence :
   1. **Champ personnalisé sur le produit** (ex. « Vendu sur la boutique COPROTEC » : Oui/Non, ou « Organisme »), renseigné par le service formation. Les champs personnalisés des produits sont filtrables par l'API (`filter[custom_fields.custom_field_N][eq]=…`), donc la synchro ne ramène que les bonnes formations.
   2. Un mécanisme natif de SmartOF (organisme, publication au catalogue en ligne), s'il existe et s'il est exposé par l'API (QSO-3).
   3. Une convention sur la référence (`customId`, filtrable en « contient ») ou sur les compétences : c'est fragile, car cela repose sur une saisie manuelle sans contrôle.
 
   Le filtre s'applique à la synchro **et** au moment de réserver : la boutique refuse toute réservation sur une session dont le produit n'est pas dans son catalogue.
 - **Sessions affichées :** uniquement les sessions ouvertes à l'inscription (`GET /v2/sessions_ouvertes`), dans le futur. Les sessions passées disparaissent d'office. Date limite de réservation avant le début de la session : QE-6.
-- **Cycle de vie :** le service formation crée, annule ou remplace les sessions dans SmartOF, et la synchro reflète ces changements. La conduite à tenir pour une session annulée qui a déjà des réservations payées est une question métier (QE-5).
+- **Cycle de vie :** le service formation crée, annule ou remplace les sessions dans SmartOF, et la synchro reflète ces changements. La conduite à tenir pour une session annulée qui a déjà des réservations payées est une question métier (QSO-17).
 - **Contenu :** fiches simples en v1 (intitulé, dates, lieu, durée, prix, places restantes), car le détail est déjà sur le site vitrine. Le regroupement par provenance ou par thème viendra dans un lot ultérieur.
 
 ### 5.3 Réservation
 
-- **Une réservation = une session, 1 à N participants, un seul paiement regroupé.** Exemple : une société inscrit 4 salariés à la même session et paie une seule fois pour les 4. Le formulaire affiche un bloc de champs par participant. Nombre maximum de participants : QE-3.
+- **Une réservation = une session, 1 à N participants, un seul paiement regroupé.** Exemple : une société inscrit 4 salariés à la même session et paie une seule fois pour les 4. Le formulaire affiche un bloc de champs par participant. Nombre maximum de participants : variable selon la formation (QE-3), à lire dans SmartOF (QSO-19).
 - **Réservation en invité** (pas de compte), comme `boutique-old`. Particuliers : QE-2 (l'ancienne boutique imposait société et SIRET).
 - **Champs repris de `boutique-old`, mieux structurés et validés champ par champ :**
   - Contact : prénom, nom, email (avec confirmation), téléphone.
-  - Société : raison sociale, adresse, code postal, ville, SIRET, APE, TVA intracommunautaire, nombre de salariés, OPCO, organisation professionnelle, dirigeant (prénom, nom), téléphone et email de la société, remarque.
+  - Société : raison sociale, pays, adresse, code postal, ville, SIRET, APE, TVA intracommunautaire, nombre de salariés, OPCO, organisation professionnelle, dirigeant (prénom, nom), téléphone et email de la société, remarque.
+  - **Pays de la société** (France par défaut). En France : adresse proposée par la Base Adresse Nationale au fil de la frappe (Géoplateforme IGN, sans clé, qui remplit adresse, code postal et ville ; la saisie manuelle reste possible), code postal à 5 chiffres, SIRET (clé de Luhn), APE et OPCO obligatoires. Ailleurs : saisie libre, code postal contrôlé pour les pays voisins (4 chiffres en Suisse, Belgique, Luxembourg…) ou générique sinon, sans SIRET, APE ni OPCO, TVA au format du pays (provisoire : QE-38, QSO-20).
+  - **Téléphones** : format français strict (`0X XX XX XX XX` ou `+33`), ou international avec indicatif (`+41 76 333 01 11`, `0041…`), indiqué sous le champ. Stockés au format E.164 (`+41763330111`), affichés au format national pour la France.
   - Listes reprises de `boutique-old` (validité à confirmer : QE-29) : organisation professionnelle (Non-adhérent, CAPEB, FFB, SYNASAV…, sans effet sur le prix dans l'ancienne boutique) ; situation du participant (Salarié, Gérant non salarié, Demandeur d'emploi).
   - Par participant : prénom, nom, date de naissance, situation, **n° de sécurité sociale obligatoire** (passeport prévention, format `^[12][0-9]{4}([0-9]{2}|2A|2B)[0-9]{8}$`). Sans ce numéro, pas d'inscription en ligne : le message renvoie vers le service formation (règle de `boutique-old`).
 - **Financements (repris de `boutique-old`) :**
-  - Sans financement : paiement par CB, virement ou chèque.
+  - Sans financement : paiement par CB ou virement (chèque supprimé : QE-8).
   - France Travail (ex-Pôle emploi) : identifiant demandeur d'emploi obligatoire (format de `boutique-old`), mode de paiement « financement ».
-  - CPF : proposé seulement pour certaines formations. Il redirige vers moncompteformation.gouv.fr, sans réservation dans la boutique. Dans `boutique-old`, la seule formation concernée était codée en dur (`T68-25`). Ici, l'éligibilité doit venir de SmartOF, par exemple une case « Éligible CPF » sur le produit (QE-28).
+  - CPF : proposé seulement pour certaines formations. Il redirige vers moncompteformation.gouv.fr, sans réservation dans la boutique. Dans `boutique-old`, la seule formation concernée était codée en dur (`T68-25`). Ici, l'éligibilité doit venir de SmartOF, par exemple une case « Éligible CPF » sur le produit (QSO-18).
   - Financement en plusieurs parties (tiers + reste à charge) : QE-13.
-- **Prix :** repris de SmartOF (`presetTarification` du produit, HT + TVA). **Prix unique par formation** (QE-10, tranchée) : même prix pour tous les clients et toutes les sessions ; lecture exacte dans l'API à confirmer (QSO-4). Total = prix unitaire × nombre de participants. Affichage HT/TTC et frais annexes : QE-11, QE-12.
+- **Prix :** repris de SmartOF (`presetTarification` du produit, HT + TVA). **Prix unique par formation** (QE-10, tranchée) : même prix pour tous les clients et toutes les sessions ; lecture exacte dans l'API à confirmer (QSO-4). Total = prix unitaire × nombre de participants. Affichage HT et TTC (QE-11, à confirmer) ; aucun frais annexe (QE-12).
 
 ### 5.4 Places et blocage
 
-Une place n'est prise que par une réservation **payée** (ou engagée, pour le virement et le chèque : QE-8). Il n'y a pas de demande en attente de validation.
+Une place n'est prise que par une réservation **payée** (ou engagée, pour le virement et France Travail : QE-8). Il n'y a pas de demande en attente de validation.
 
 - **Places disponibles** = limite SmartOF − inscrits SmartOF − places bloquées ou payées dans la boutique mais pas encore transmises.
 - **Blocage temporaire :** au passage au paiement, la boutique bloque les N places pendant un délai limité : **30 min**, réglable (`BOUTIQUE_BLOCAGE_PAIEMENT_MINUTES`) ; décision technique de l'équipe de développement (ex-QE-7, retirée du questionnaire). Sans paiement dans ce délai, les places sont libérées.
@@ -102,14 +104,17 @@ Une place n'est prise que par une réservation **payée** (ou engagée, pour le 
 - **CB : Monetico**, repris et amélioré depuis `boutique-old` (POST signé HMAC-SHA1 vers `p.monetico-services.com`, cf. `../boutique-old/view/reservation/etape3.inc.php`). Un environnement de test Monetico reste utilisable en permanence en préprod.
   - Le paiement n'est considéré comme validé qu'à réception de la **notification serveur à serveur de Monetico** (URL de retour « CGI2 », signature vérifiée). Le retour du navigateur du client sert seulement à l'affichage : il ne suffit pas à valider.
   - Référence de commande unique, envoyée à Monetico et reprise dans SmartOF (`customId`). Format : `BQ` + AAMMJJ + 4 caractères, ex. `BQ260930K7X2` (12 caractères, limite de la référence Monetico).
-- **Virement, chèque, financement tiers :** conservés dès le MVP. Suivi de la réception et délai de paiement : QE-14, QE-15.
+- **Virement et financement France Travail :** conservés dès le MVP. **Le chèque est supprimé** (QE-8, QE-21). Virement à régler sous **10 jours** ; les assistantes formation vérifient la réception et la notent dans SmartOF (QE-8).
+- **Pas de financement partagé** : le client paie la totalité et se fait rembourser par son OPCO (QE-13).
 - **Factures :** émises par SmartOF, rien à faire dans la boutique. La boutique transmet seulement l'information de paiement à SmartOF (QSO-7).
-- **Annulation, remboursement, rétractation :** gérés par la comptabilité (avoirs ou remboursements directs). Règles et options pour décharger la compta : QE-16 à QE-18.
+- **Annulation, remboursement, rétractation :** remboursements faits **directement par le service comptable** (avoirs ou virements), sans email automatique de la boutique (QE-17). Conditions d'annulation : QE-16 ; rétractation des particuliers : QE-2.
 
 ### 5.6 Communications
 
-- Répartition entre les envois automatiques de SmartOF et ceux de la boutique : QE-19 à QE-22.
-- Au minimum, la boutique envoie un **récapitulatif de commande** au client (avec les coordonnées de paiement pour un virement ou un chèque) et une **alerte technique** en cas d'échec d'envoi à SmartOF.
+- SmartOF rédige la **convention** (QE-19).
+- La boutique envoie au client une **confirmation de pré-inscription**, avec le **RIB** pour un virement ou un **reçu** pour un paiement CB (QE-20).
+- **Avis interne à contact@coprotec.net** à chaque réservation (QE-22), **sans données personnelles** (minimisation RGPD) : n° de commande, formation, dates, nombre de participants, financement, paiement, montant ; le dossier complet se consulte dans SmartOF (commanditaire = n° de commande). Même principe pour l'**alerte technique** d'échec d'envoi à SmartOF.
+- **Préprod :** `MAILER_OVERSEER` (liste d'adresses) reçoit tous les emails à la place des vrais destinataires, objet préfixé par le destinataire prévu. Vide en prod.
 
 ### 5.7 Écrans
 
@@ -120,7 +125,7 @@ Une place n'est prise que par une réservation **payée** (ou engagée, pour le 
 | Réservation — étape 1 | Nombre de participants, contact, société, participants, financement. Validation champ par champ. |
 | Réservation — étape 2 | Mode de paiement, récapitulatif, acceptation des CGV. Les places sont bloquées à ce moment-là. |
 | Paiement CB | Redirection vers Monetico, puis retour succès ou échec. |
-| Confirmation | Récapitulatif, n° de commande, instructions pour le virement ou le chèque. |
+| Confirmation | Récapitulatif, n° de commande, RIB pour le virement, reçu pour la CB. |
 | Pages légales | Mentions légales, CGV, politique de confidentialité (QE-27). |
 | Erreurs | Session complète ou fermée, formation introuvable, erreur de paiement. |
 
@@ -130,18 +135,17 @@ Une seule langue (français). Le site doit s'afficher correctement sur mobile.
 
 ### 5.8 Session privée (intra) — lien d'inscription sans mot de passe + QR code
 
-Fonction **prévue, non développée** : son intérêt et ses règles dépendent de QE-37 (et QSO-15 côté SmartOF).
+Fonction **retenue, non développée** (QE-37) : lien privé + QR code. Restent le prix (QE-37) et la création de la session côté SmartOF (QSO-15).
 
 - **Besoin :** une entreprise réserve une session entière pour ses seuls salariés (ex. Leroy Merlin). Cette session ne doit pas apparaître au catalogue public.
 - **Principe proposé :**
   1. Le service formation crée la session dans SmartOF, sans la publier au catalogue (QSO-15).
   2. La boutique génère pour cette session un **lien privé** : URL contenant un jeton aléatoire long, non devinable, sans compte ni mot de passe. Le jeton peut être révoqué et expire à la date limite de réservation de la session.
   3. La boutique produit le **QR code** de ce lien (image à imprimer ou à joindre au mail envoyé à l'entreprise).
-  4. Le lien ouvre le formulaire de réservation habituel, pré-rempli et verrouillé sur la session et l'entreprise ; seuls les participants restent à saisir. Le contrôle des places, la transmission à SmartOF et le `customId` restent identiques à une réservation normale.
-  5. Paiement : CB Monetico, virement, ou au choix selon QE-37 b. Prix : catalogue par participant ou forfait selon QE-37 c.
+  4. Le lien ouvre le formulaire de réservation habituel, pré-rempli et verrouillé sur la session et l'entreprise : l'entreprise y inscrit ses participants. Le contrôle des places et le `customId` restent identiques à une réservation normale.
+  5. **Validation par le paiement** (décidé, QE-37) : une fois tous les participants renseignés, le paiement valide l'inscription, enregistrée d'abord dans la boutique, **puis** envoyée à SmartOF. Prix : catalogue par participant ou forfait (QE-37).
 - **Création du lien :** pas de back-office en v1, donc une commande console (`app:session-privee:creer <session SmartOF> <entreprise>`) qui affiche l'URL et enregistre le QR code. Un écran d'administration viendra avec le back-office.
 - **Sécurité :** jeton d'au moins 128 bits, page non indexée (`noindex`), limitation de débit sur l'URL. Quiconque possède le lien peut inscrire des participants : c'est accepté, le nombre de places de la session borne l'effet d'une fuite.
-- **Ouvert :** qui inscrit (un responsable pour le groupe, ou chaque salarié via le QR code : QE-37 d). Dans le second cas, chaque scan crée une réservation d'un participant, et le paiement par participant en CB devient peu adapté (plutôt virement global de l'entreprise).
 
 ### 5.9 Hors v1
 
@@ -214,15 +218,17 @@ stateDiagram-v2
   [*] --> PlacesBloquees: passage au paiement
   PlacesBloquees --> Expiree: délai dépassé
   PlacesBloquees --> Payee: paiement CB validé
-  PlacesBloquees --> EnAttentePaiement: virement / chèque / France Travail (QE-8)
+  PlacesBloquees --> EnAttentePaiement: virement / France Travail (QE-8)
   EnAttentePaiement --> Payee: réception constatée
-  EnAttentePaiement --> Expiree: délai dépassé (QE-15)
+  EnAttentePaiement --> Expiree: délai dépassé (QE-8)
   Payee --> Transmise: inscription créée dans SmartOF
   Payee --> ErreurTransmission: échec
   ErreurTransmission --> Transmise: relance réussie
 ```
 
 Les données sensibles (n° de sécu) sont conservées le moins longtemps possible après la transmission (QE-26).
+
+Coordonnées de la société dans `commande` : `societe_pays` (code ISO 3166-1 alpha-2 sur 2 caractères, `FR` par défaut), `societe_code_postal` (10 caractères pour les codes étrangers), `societe_siret` / `societe_ape` / `societe_opco` vides hors de France ; téléphones du contact et de la société en E.164.
 
 ## 8. Migration des données
 
@@ -270,7 +276,7 @@ Même organisation que `/coplanif`, qui tourne déjà en préprod et en prod :
 |---|---|---|
 | Doc API SmartOF v2 | Disponible | — |
 | Clé API + instance SmartOF de test | À obtenir (QSO-1) | Porteur du projet / éditeur SmartOF |
-| Champs personnalisés SmartOF (produit, apprenant, entreprise, commanditaire) | À créer après QE-4, QE-23, QE-28 | Porteur du projet |
+| Champs personnalisés SmartOF (produit, apprenant, entreprise, commanditaire) | À créer après QSO-3, QE-23, QSO-18 | Porteur du projet |
 | Identifiants Monetico de test et de prod (TPE, clé, code société) | Décidé : ceux de `boutique-old` (même TPE). Nouvelle URL de notification à déclarer chez Monetico ; valeurs à fournir dans `.env.local` (non versionné) | Porteur du projet / banque |
 | Compte Brevo (clé API, expéditeur) | Décidé : celui de `boutique-old` ; valeurs dans `.env.local` | Porteur du projet |
 | Noms de domaine préprod et prod, certificats HTTPS | Décidé : préprod `preprod.app.coprotec.net`, prod = domaine actuel de `boutique-old` (bascule à la mise en ligne). DNS et certificat préprod à créer | Porteur du projet |
@@ -295,10 +301,10 @@ Même organisation que `/coplanif`, qui tourne déjà en préprod et en prod :
 - [x] ERP : Navision abandonné, remplacé par **SmartOF** (API v2).
 - [x] But v1 : afficher et rendre réservables et payables **les seules formations COPROTEC** présentes dans SmartOF.
 - [x] Catalogue : copie locale synchronisée chaque matin tôt + déclenchement à la demande ; places revérifiées en direct avant paiement.
-- [x] Inscription : **directe, sans validation** (à confirmer par QE-1), via entreprises, apprenants et commanditaires ; `customId` = n° de commande.
+- [x] Inscription : **directe, sans validation** (QE-1), via entreprises, apprenants et commanditaires ; `customId` = n° de commande.
 - [x] Réservation groupée : N participants pour une session, un seul paiement.
 - [x] Places : prises par les réservations payées (pas de demandes en attente), blocage temporaire pendant le paiement, verrou contre les réservations simultanées.
-- [x] Paiement au moment de la réservation (comme `boutique-old`) : Monetico CB + virement, chèque, financement tiers.
+- [x] Paiement au moment de la réservation (comme `boutique-old`) : Monetico CB + virement, financement France Travail (chèque supprimé, QE-8).
 - [x] Financements et champs du formulaire repris de `boutique-old`, avec validation stricte par champ.
 - [x] Facturation : entièrement dans SmartOF ; remboursements et avoirs : comptabilité.
 - [x] Pas de code promo, pas de back-office, réservation en invité en v1.
@@ -307,7 +313,15 @@ Même organisation que `/coplanif`, qui tourne déjà en préprod et en prod :
 - [x] Administration SmartOF (clé API, champs personnalisés) : porteur du projet (DSI).
 - [x] Blocage des places pendant le paiement CB : 30 min, réglable ; décision technique (ex-QE-7).
 - [x] Surréservation résiduelle : remboursement du client par virement (QE-9).
-- [x] Prix : unique par formation, repris de SmartOF ; pas de tarif par type de client ni par session (QE-10).
+- [x] Prix : unique par formation, repris de SmartOF ; pas de tarif par type de client ni par session (QE-10) ; aucun frais annexe (QE-12).
+- [x] Nombre maximum de participants par réservation : variable selon la formation, lu dans SmartOF (QE-3, QSO-19).
+- [x] Session privée (intra) : lien privé + QR code envoyés à l'entreprise ; inscription validée par le paiement une fois tous les participants renseignés, enregistrée dans la boutique puis envoyée à SmartOF (QE-37).
+- [x] Virement, France Travail : places bloquées dès la commande, comme une inscription ; **chèque supprimé** ; virement sous 10 jours, suivi dans SmartOF par les assistantes formation (QE-8, QE-21 ; réunion du 07/10).
+- [x] Réservation en ligne jusqu'à **J-3** avant la session (QE-6). Prix affiché **HT et TTC** (QE-11). Pas de financement partagé (QE-13).
+- [x] Emails : confirmation de pré-inscription + RIB ou reçu CB au client (QE-20) ; avis sans données personnelles à contact@coprotec.net (QE-22).
+- [x] N° de sécurité sociale **effacé dès la transmission** à SmartOF (QE-26).
+- [x] Session privée (intra) : **forfait négocié** pour la session (QE-37).
+- [x] Sociétés hors de France acceptées : pays au choix, SIRET / APE / OPCO exigés en France seulement (2026-10-07 ; à confirmer : QE-38, QSO-20). Téléphones validés par regex sans bibliothèque (France strict, ailleurs indicatif + 7 à 15 chiffres) et stockés en E.164. Adresses françaises suggérées par la Base Adresse Nationale.
 
 ## 14. Plan de réalisation
 
@@ -316,23 +330,28 @@ Construction de l'application complète, lot par lot, jusqu'à une préprod test
 | Lot | Contenu | Dépend de | État (2026-09-30) |
 |---|---|---|---|
 | 1. Socle | Squelette Symfony 7.4, Docker dev (php-apache + MySQL), Encore + Vue 3, gabarit de page (charte `boutique-old`) | — | Fait |
-| 2. Catalogue | Entités `Formation` / `Session`, client API SmartOF, commande de synchro (filtre COPROTEC configurable), SmartOF simulé en dev, pages catalogue et fiche | QE-4, QSO-1, QSO-3 (valeurs provisoires en attendant) | Fait (SmartOF simulé) |
+| 2. Catalogue | Entités `Formation` / `Session`, client API SmartOF, commande de synchro (filtre COPROTEC configurable), SmartOF simulé en dev, pages catalogue et fiche | QSO-1, QSO-3 (valeurs provisoires en attendant) | Fait (SmartOF simulé) |
 | 3. Réservation | Formulaire (participants dynamiques en Vue), validations, `Commande` / `Participant`, blocage des places avec verrou, expiration | QE-3, QE-8 | Fait |
-| 4. Paiement | Monetico (aller + notification serveur), virement / chèque / France Travail, emails via Brevo | Accès Monetico de test | Fait (simulateur Monetico en dev) |
+| 4. Paiement | Monetico (aller + notification serveur), virement / France Travail, emails via Brevo | Accès Monetico de test | Fait (simulateur Monetico en dev) |
 | 5. Envoi SmartOF | Entreprise, apprenants, commanditaire ; file de relances ; alertes | QE-23, QSO-5, QSO-12 | Fait (SmartOF simulé) |
 | 6. Préprod | `docker-compose.preprod.yml`, `deploy.sh`, cron, vhost Apache de l'hôte, GitHub Actions | Dépôt GitHub, DNS `preprod.app.coprotec.net` | Fichiers prêts, non déployé |
 | 7. Recette | Parcours complets en préprod avec les équipes | QE-35 | À faire |
-| 8. Session privée (intra) | Lien d'inscription privé à jeton (sans mot de passe), QR code, commande console de création, formulaire verrouillé sur la session et l'entreprise (§5.8) | QE-37, QSO-15 | Prévu, à confirmer |
+| 8. Session privée (intra) | Lien d'inscription privé à jeton (sans mot de passe), QR code, commande console de création, formulaire verrouillé sur la session et l'entreprise (§5.8) | QE-37 (prix), QSO-15 | Retenu, à développer |
 
 ## 15. Points ouverts
 
 Voir [`QUESTIONS_EQUIPES.md`](QUESTIONS_EQUIPES.md) et les prérequis techniques du §11. Questions bloquantes pour le développement :
 
-- **QE-4 / QSO-3** : critère d'identification des formations COPROTEC, qui conditionne la synchro du catalogue.
+- **QSO-3** : critère d'identification des formations COPROTEC, qui conditionne la synchro du catalogue.
 - **QSO-4 / QSO-13** : lecture du prix unique dans l'API et limite de places qui fait foi, qui conditionnent le calcul du prix et des places.
-- **QE-8** : blocage ou non des places pour le virement, le chèque et le financement France Travail.
-- **QE-37 / QSO-15** : sessions privées (intra), qui conditionnent le lot 8.
-- **QE-23** : liste des champs personnalisés à créer dans SmartOF, qui conditionne l'envoi des inscriptions.
+- **QSO-15** : création des sessions privées (intra) dans SmartOF, qui conditionne le lot 8 (prix : forfait négocié, QE-37).
+- **QE-23** : toutes les données utiles partent dans SmartOF (n° de sécu, date de naissance, statut, financement, paiement, OPCO…) ; reste à créer les champs personnalisés côté SmartOF et à les déclarer dans `SMARTOF_CHAMPS_*`.
 - **QSO-1** : instance de test, qui conditionne les tests d'intégration.
 
 Ces questions bloquent chacune une partie précise, pas le démarrage : le squelette, Docker, le tunnel de réservation et Monetico en mode test peuvent avancer sans elles.
+
+**À reprendre juste avant la mise en prod (reportés volontairement) :**
+
+- **QE-2 — particuliers** : case « particulier » qui adapte les champs. Vérifier d'abord les règles (délai de rétractation et paiement exigible pour une personne qui finance elle-même sa formation, cf. Code du travail L6353-3 à 6), et l'enregistrement d'un apprenant sans entreprise dans SmartOF.
+- **QE-36 — statistiques** : mesure d'audience et suivi des formulaires commencés mais non terminés. Choisir l'outil et le mode de consentement (ex. Matomo sans cookie).
+- **QE-16 / QE-27 — CGV** : aucune CGV en place à ce jour, à rédiger et faire valider avant d'ouvrir la vente en ligne.

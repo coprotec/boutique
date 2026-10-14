@@ -48,6 +48,10 @@ class EnrollmentSender
         try {
             $uid = $this->existingSponsor($commande) ?? $this->createEnrollment($commande);
             $commande->markSent($uid, $maintenant);
+            // QE-26 : le n° de sécurité sociale n'est plus conservé une fois dans SmartOF.
+            foreach ($commande->getParticipants() as $participant) {
+                $participant->eraseSocialSecurityNumber();
+            }
             $this->logger->info('Commande transmise à SmartOF', ['commande' => $commande->getNumero(), 'commanditaire' => $uid]);
             $this->em->flush();
 

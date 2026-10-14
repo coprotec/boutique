@@ -1,10 +1,17 @@
 {% extends 'emails/_layout.html.twig' %}
 
+{# Minimisation RGPD : aucune donnée personnelle (participants, contact, société, remarque) dans cet email interne.
+   Le dossier complet se consulte dans SmartOF, où l'inscription est transmise automatiquement. #}
 {% block contenu %}
+    {% set session = commande.session %}
     <p>Nouvelle réservation sur la boutique : <strong>{{ commande.numero }}</strong>.</p>
-    {{ include('emails/_commande.html.twig') }}
-    <p>Contact : {{ commande.contact.prenom }} {{ commande.contact.nom }} — {{ commande.contact.email }} — {{ commande.contact.telephone|phone }}</p>
-    {% if commande.identifiantFranceTravail %}<p>Identifiant France Travail : {{ commande.identifiantFranceTravail }}</p>{% endif %}
-    {% if commande.remarque %}<p>Remarque du client : {{ commande.remarque }}</p>{% endif %}
-    <p style="color:#5b6776;font-size:13px;">L'inscription est transmise automatiquement à SmartOF (commanditaire « {{ commande.numero }} »).</p>
+    <table role="presentation" width="100%" cellpadding="6" cellspacing="0" style="border-collapse:collapse;font-size:14px;margin:16px 0;">
+        <tr><td style="color:#5b6776;width:40%;">Formation</td><td><strong>{{ session.formation.intitule }}</strong>{% if session.formation.reference %} ({{ session.formation.reference }}){% endif %}</td></tr>
+        <tr><td style="color:#5b6776;">Dates</td><td>{% if session.multiDay %}Du {{ session.dateDebut|date_fr('d MMMM') }} au {{ session.dateFin|date_fr('d MMMM y') }}{% else %}{{ session.dateDebut|date_fr('EEEE d MMMM y') }}{% endif %}</td></tr>
+        <tr><td style="color:#5b6776;">Participants</td><td>{{ commande.nbParticipants }}</td></tr>
+        <tr><td style="color:#5b6776;">Financement</td><td>{{ commande.financement.label }}</td></tr>
+        <tr><td style="color:#5b6776;">Paiement</td><td>{{ commande.modePaiement.label }}{% if commande.modePaiement.value == 'virement' %} — à vérifier sous 10 jours{% endif %}</td></tr>
+        <tr><td style="color:#5b6776;">Total</td><td><strong>{{ commande.totalTtcCentimes|price }} TTC</strong> ({{ commande.totalHtCentimes|price }} HT)</td></tr>
+    </table>
+    <p>Le dossier complet (entreprise, contact, participants) est dans SmartOF : recherchez le commanditaire <strong>{{ commande.numero }}</strong>.</p>
 {% endblock %}

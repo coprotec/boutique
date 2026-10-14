@@ -23,7 +23,7 @@ enum Funding: string
     public function paymentMethods(): array
     {
         return match ($this) {
-            self::Aucun => [PaymentMethod::Cb, PaymentMethod::Virement, PaymentMethod::Cheque],
+            self::Aucun => [PaymentMethod::Cb, PaymentMethod::Virement], // plus de chèque (QE-8, QE-21)
             self::FranceTravail => [PaymentMethod::Financement],
         };
     }

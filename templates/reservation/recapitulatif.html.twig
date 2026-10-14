@@ -36,8 +36,7 @@
                                 <strong>{{ mode.label }}</strong>
                                 <small class="d-block text-body-secondary">
                                     {%- if mode.value == 'cb' %}Paiement sécurisé immédiat (Monetico). Vos places sont réservées pendant le paiement.
-                                    {%- elseif mode.value == 'virement' %}Les coordonnées bancaires vous sont envoyées par email avec le récapitulatif.
-                                    {%- elseif mode.value == 'cheque' %}L'adresse d'envoi du chèque vous est communiquée par email.
+                                    {%- elseif mode.value == 'virement' %}Le RIB vous est envoyé par email avec la confirmation, virement à effectuer sous 10 jours.
                                     {%- else %}La formation est prise en charge par France Travail : rien à régler en ligne.{% endif -%}
                                 </small>
                             </span>

@@ -29,7 +29,7 @@ class Participant
     #[ORM\Column(length: 50)]
     private string $situation;
 
-    /** N° de sécurité sociale chiffré (libsodium, cf. Encryptor) ; vidé après transmission et délai RGPD (QE-26). */
+    /** N° de sécurité sociale chiffré (libsodium, cf. Encryptor) ; effacé dès la transmission à SmartOF (QE-26). */
     #[ORM\Column(type: Types::TEXT)]
     private string $numeroSecuChiffre = '';
 
