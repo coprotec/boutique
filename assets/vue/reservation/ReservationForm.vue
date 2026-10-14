@@ -1,22 +1,26 @@
 <script setup>
-import { computed, reactive, ref, watch } from 'vue';
+import { computed, nextTick, reactive, ref, watch } from 'vue';
 import Champ from '../tool/FormType/Champ.vue';
 import AdresseFrance from '../tool/FormType/AdresseFrance.vue';
+import OutilsTest from './OutilsTest.vue';
+import { formulaire as formulaireTest } from './donneesTest.js';
 
 const props = defineProps({ config: { type: Object, required: true } });
 const c = props.config;
 
 const participantVide = () => ({ prenom: '', nom: '', dateNaissance: '', situation: '', numeroSecu: '' });
+const contactVide = () => ({ prenom: '', nom: '', email: '', emailConfirmation: '', telephone: '' });
+const societeVide = () => ({
+    raisonSociale: '', pays: 'FR', adresse: '', codePostal: '', ville: '', siret: '', ape: '', tvaIntracom: '',
+    nbSalaries: null, opco: '', organisationProfessionnelle: '', dirigeantPrenom: '', dirigeantNom: '',
+    telephone: '', email: '',
+});
 
 const saisie = c.saisie ?? {};
 const form = reactive({
     participants: saisie.participants ?? Array.from({ length: Math.min(c.nbInitial, c.maxParticipants) }, participantVide),
-    contact: { prenom: '', nom: '', email: '', emailConfirmation: '', telephone: '', ...(saisie.contact ?? {}) },
-    societe: {
-        raisonSociale: '', pays: 'FR', adresse: '', codePostal: '', ville: '', siret: '', ape: '', tvaIntracom: '',
-        nbSalaries: null, opco: '', organisationProfessionnelle: '', dirigeantPrenom: '', dirigeantNom: '',
-        telephone: '', email: '', ...(saisie.societe ?? {}),
-    },
+    contact: { ...contactVide(), ...(saisie.contact ?? {}) },
+    societe: { ...societeVide(), ...(saisie.societe ?? {}) },
     financement: saisie.financement ?? 'aucun',
     identifiantFranceTravail: saisie.identifiantFranceTravail ?? '',
     remarque: saisie.remarque ?? '',
@@ -54,6 +58,27 @@ const enFrance = computed(() => form.societe.pays === 'FR');
 const aideTelephone = 'Hors de France, commencez par l\'indicatif du pays : +41 76 333 01 11.';
 function adresseChoisie({ adresse, codePostal, ville }) {
     Object.assign(form.societe, { adresse, codePostal, ville });
+}
+
+// Outils de test (dev, préprod) : remplit tout le formulaire en gardant le nombre de participants affiché.
+async function remplirTest({ pays, financement, envoyer: aEnvoyer }) {
+    cpf.value = false;
+    Object.assign(form, formulaireTest(c, { nbParticipants: nb.value, pays, financement }));
+    erreurs.value = {};
+    erreurGenerale.value = '';
+    if (aEnvoyer) {
+        await nextTick();
+        await envoyer();
+    }
+}
+function viderTest() {
+    Object.assign(form, {
+        participants: Array.from({ length: nb.value }, participantVide),
+        contact: contactVide(), societe: societeVide(), financement: 'aucun', identifiantFranceTravail: '', remarque: '',
+    });
+    cpf.value = false;
+    erreurs.value = {};
+    erreurGenerale.value = '';
 }
 
 async function envoyer() {
@@ -220,5 +245,7 @@ async function envoyer() {
                 <p class="resume__note">Étape suivante : choix du mode de paiement et confirmation.</p>
             </div>
         </aside>
+
+        <OutilsTest v-if="c.outilsTest" @remplir="remplirTest" @vider="viderTest" />
     </form>
 </template>

@@ -251,3 +251,9 @@ h1, h2, h3, .h1, .h2, .h3, .h4, .h5, .h6 { font-family: var(--police-titre); fon
 
 .confirmation { font-family: var(--police-titre); font-size: 1.75rem; font-weight: 700; color: var(--c-ok); margin-bottom: .5rem; }
 .panneau--centre { max-width: 34rem; margin: 2rem auto; text-align: center; }
+
+/* Outils de test (dev, préprod) : panneau superposé en bas à gauche, replié par défaut, au-dessus de la barre de débogage Symfony. */
+.outils-test { position: fixed; left: 1rem; bottom: 3.25rem; z-index: 1050; width: 15rem; max-width: calc(100vw - 2rem); background: var(--c-surface); border: 1px solid var(--c-marine); border-radius: var(--rayon); padding: .75rem .9rem; box-shadow: 0 4px 12px rgba(7, 43, 89, .25); }
+.outils-test:not([open]) { width: auto; padding-bottom: .75rem; }
+.outils-test__titre { font-family: var(--police-titre); font-size: 1.1rem; font-weight: 600; color: var(--c-marine-fonce); cursor: pointer; }
+.outils-test__note { font-size: .8rem; color: var(--c-texte-doux); margin: .4rem 0 .75rem; }

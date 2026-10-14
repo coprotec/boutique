@@ -36,6 +36,14 @@ final class CheckoutTest extends WebTestCase
         self::assertResponseStatusCodeSame(404);
     }
 
+    public function testOutilsDeTestDesactivesParDefaut(): void
+    {
+        $crawler = $this->client->request('GET', '/reservation/2');
+
+        self::assertResponseIsSuccessful();
+        self::assertFalse(json_decode($crawler->filter('[data-vue="reservation-form"]')->attr('data-props'), true)['config']['outilsTest']);
+    }
+
     public function testErreursDeValidationRenvoyeesChampParChamp(): void
     {
         $csrf = $this->ouvrirFormulaire(2);

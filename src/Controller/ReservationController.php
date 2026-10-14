@@ -17,6 +17,7 @@ use App\Reservation\CompanyInput;
 use App\Reservation\Formats;
 use App\Smartof\EnrollmentSender;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -41,6 +42,8 @@ final class ReservationController extends AbstractController
         private readonly SessionRepository $sessions,
         private readonly BookingRules $regles,
         private readonly Availability $disponibilite,
+        // Panneau de remplissage aléatoire du formulaire : dev et préprod uniquement (la préprod tourne en APP_ENV=prod).
+        #[Autowire('%env(bool:BOUTIQUE_OUTILS_TEST)%')] private readonly bool $outilsTest,
     ) {
     }
 
@@ -66,6 +69,7 @@ final class ReservationController extends AbstractController
                 'financements' => array_map(static fn (Funding $f): array => ['valeur' => $f->value, 'libelle' => $f->label()], Funding::cases()),
                 'saisie' => $request->getSession()->get(self::CLE_SESSION.$id),
                 'nbInitial' => max(1, $request->query->getInt('participants', 1)),
+                'outilsTest' => $this->outilsTest,
             ],
         ]);
     }
