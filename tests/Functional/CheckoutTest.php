@@ -9,6 +9,7 @@ use App\Tests\BoutiqueTestTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\BrowserKit\Cookie;
 
 final class CheckoutTest extends WebTestCase
 {
@@ -34,6 +35,17 @@ final class CheckoutTest extends WebTestCase
 
         $this->client->request('GET', '/formation/aut-01');
         self::assertResponseStatusCodeSame(404);
+    }
+
+    public function testBandeauCookiesTantQueLeVisiteurNAPasChoisi(): void
+    {
+        $crawler = $this->client->request('GET', '/');
+        self::assertNull($crawler->filter('#bandeau-cookies')->attr('hidden'));
+        self::assertCount(1, $crawler->filter('[data-cookies-ouvrir]'));
+
+        $this->client->getCookieJar()->set(new Cookie('mesure_audience', 'non'));
+        $crawler = $this->client->request('GET', '/');
+        self::assertNotNull($crawler->filter('#bandeau-cookies')->attr('hidden'));
     }
 
     public function testOutilsDeTestDesactivesParDefaut(): void

@@ -60,6 +60,12 @@ function adresseChoisie({ adresse, codePostal, ville }) {
     Object.assign(form.societe, { adresse, codePostal, ville });
 }
 
+// Mesure d'audience (QE-36) : première saisie dans le formulaire. Comparé aux arrivées sur le récapitulatif, donne les
+// formulaires commencés mais pas terminés. Sans Matomo (cf. assets/scripts/mesure.js) : aucun effet.
+function formulaireCommence() {
+    window._paq?.push(['trackEvent', 'Réservation', 'Formulaire commencé']);
+}
+
 // Outils de test (dev, préprod) : remplit tout le formulaire en gardant le nombre de participants affiché.
 async function remplirTest({ pays, financement, envoyer: aEnvoyer }) {
     cpf.value = false;
@@ -117,7 +123,7 @@ async function envoyer() {
 </script>
 
 <template>
-    <form class="tunnel" novalidate @submit.prevent="envoyer">
+    <form class="tunnel" novalidate @submit.prevent="envoyer" @input.once="formulaireCommence">
         <div class="tunnel__principal">
             <!-- 1. Participants -->
             <section class="etape">

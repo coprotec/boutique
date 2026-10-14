@@ -45,10 +45,12 @@
                 </div>
 
                 {# Texte repris de boutique-old (étape 3, « Convention de formation ») ; CGV : QE-16. #}
+                {# Case non cochée à l'envoi : le navigateur bloque (required), assets/scripts/formulaires.js met le bloc en erreur. #}
                 <label class="consentement">
-                    <input type="checkbox" name="consentement" value="1" required>
-                    <span>J'accepte que mes coordonnées soient utilisées afin qu'une convention de formation me soit transmise pour finaliser l'inscription à la formation.</span>
+                    <input type="checkbox" name="consentement" value="1" required aria-describedby="consentement-erreur">
+                    <span>J'accepte que mes coordonnées soient utilisées afin qu'une convention de formation me soit transmise pour finaliser l'inscription à la formation. <span class="requis" aria-hidden="true">*</span></span>
                 </label>
+                <p id="consentement-erreur" class="consentement__erreur">Cochez cette case pour confirmer la réservation.</p>
             </section>
         </div>
 

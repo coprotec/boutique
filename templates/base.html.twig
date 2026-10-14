@@ -66,6 +66,9 @@
                     <ul class="list-unstyled mb-0">
                         <li><a href="https://www.coprotec.net/mentions-legales/" target="_blank" rel="noopener">Mentions légales</a></li>
                         <li><a href="https://www.coprotec.net/politique-confidentialite/" target="_blank" rel="noopener">Politique de confidentialité</a></li>
+                        {% if matomo_url %}
+                            <li><button type="button" class="site-footer__lien" data-cookies-ouvrir>Gestion des cookies</button></li>
+                        {% endif %}
                     </ul>
                 </div>
                 <address class="mb-0">
@@ -78,5 +81,7 @@
             </div>
             <div class="container site-footer__bas">© COPROTEC {{ "now"|date("Y") }}</div>
         </footer>
+
+        {% if matomo_url %}{{ include('_bandeau_cookies.html.twig') }}{% endif %}
     </body>
 </html>

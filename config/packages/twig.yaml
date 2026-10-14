@@ -4,6 +4,9 @@ twig:
         # Bandeau « démonstration » (base.html.twig) dès que le catalogue ou le paiement est simulé.
         donnees_fictives: '%env(bool:SMARTOF_FAKE)%'
         paiement_simule: '%env(bool:MONETICO_SIMULE)%'
+        # Mesure d'audience et bandeau cookies (base.html.twig), seulement si MATOMO_URL est renseignée.
+        matomo_url: '%env(MATOMO_URL)%'
+        matomo_site: '%env(MATOMO_SITE_ID)%'
 
 when@test:
     twig:

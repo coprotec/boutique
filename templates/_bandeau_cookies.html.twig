@@ -1,0 +1,24 @@
+{#
+    Bandeau de consentement à la mesure d'audience (QE-36), affiché tant que le visiteur n'a pas choisi (cookie
+    « mesure_audience », 6 mois). Accepter et Refuser ont le même poids, comme l'exige la CNIL. Sans accord, Matomo
+    mesure quand même la fréquentation, sans cookie (exemption CNIL) : cf. assets/scripts/mesure.js.
+#}
+<section id="bandeau-cookies" class="bandeau-cookies" aria-labelledby="bandeau-cookies-titre"
+         data-matomo-url="{{ matomo_url }}" data-matomo-site="{{ matomo_site }}"
+         {{ app.request.cookies.has('mesure_audience') ? 'hidden' }}>
+    <div class="container bandeau-cookies__boite">
+        <div class="bandeau-cookies__texte">
+            <p id="bandeau-cookies-titre" class="bandeau-cookies__titre">Aidez-nous à améliorer la boutique</p>
+            <p class="mb-0">
+                Avec votre accord, nous suivons votre visite pour savoir quelles formations vous intéressent et à quelle
+                étape l'inscription vous fait hésiter. Ces statistiques servent uniquement à COPROTEC : ni publicité,
+                ni revente. Vous pouvez changer d'avis à tout moment en bas de page.
+                <a href="https://www.coprotec.net/politique-confidentialite/" target="_blank" rel="noopener">En savoir plus</a>
+            </p>
+        </div>
+        <div class="bandeau-cookies__actions">
+            <button type="button" class="btn btn-primary" data-cookies="oui">Accepter</button>
+            <button type="button" class="btn btn-outline-primary" data-cookies="non">Refuser</button>
+        </div>
+    </div>
+</section>
