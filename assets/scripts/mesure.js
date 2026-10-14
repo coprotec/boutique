@@ -15,6 +15,11 @@ if (bandeau) {
     const _paq = (window._paq = window._paq || []);
     _paq.push(['requireCookieConsent']);
     if (choix === 'oui') _paq.push(['setCookieConsentGiven']);
+    // Les jetons de commande (/commande/…, /paiement/…) ouvrent la commande : jamais envoyés à Matomo, ni dans
+    // l'adresse de la page ni dans celle de provenance.
+    const masquerJeton = (url) => url.replace(/[a-f0-9]{32}/g, 'jeton');
+    _paq.push(['setCustomUrl', masquerJeton(window.location.href)]);
+    _paq.push(['setReferrerUrl', masquerJeton(document.referrer)]);
     _paq.push(['trackPageView']);
     _paq.push(['enableLinkTracking']);
 
